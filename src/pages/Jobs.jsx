@@ -1,7 +1,7 @@
 import {
   MapPin,
   Search,
-  Tags,
+  Tag,
   X,
   Share2,
   Eye,
@@ -10,15 +10,15 @@ import {
   XCircle,
   Clock,
   Briefcase,
-  ExclamationTriangle,
+  AlertTriangle,
   RotateCw,
-  Lock,
-  BoxArrowInRight,
+  Lock,Tags,
+  LogIn,
   ChevronLeft,
   ChevronRight,
-  HourglassSplit,
+  Loader,
 } from "lucide-react";
-import React, { useState, useEffect, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 const API_BASE_URL = "https://developer.gspsagarwa.com/api";
 
@@ -283,17 +283,17 @@ const Jobs = () => {
 
         <div className="flex flex-wrap gap-2 my-3">
           <span className="inline-flex items-center gap-1 text-xs font-medium text-gray-500 bg-gray-100 rounded-md px-2.5 py-1">
-            <i className="bi bi-geo-alt text-xs"></i> {job.location}
+            <MapPin size={14} /> {job.location}
           </span>
           <span className="inline-flex items-center gap-1 text-xs font-medium text-teal-700 bg-teal-50 rounded-md px-2.5 py-1">
-            <i className="bi bi-currency-rupee text-xs"></i> {job.salary}
+            ₹ {job.salary}
           </span>
           <span className="inline-flex items-center gap-1 text-xs font-medium text-gray-500 bg-gray-100 rounded-md px-2.5 py-1">
-            <i className="bi bi-briefcase text-xs"></i> {job.category}
+            <Briefcase size={14} /> {job.category}
           </span>
           {job.experience && (
             <span className="inline-flex items-center gap-1 text-xs font-medium text-gray-500 bg-gray-100 rounded-md px-2.5 py-1">
-              <i className="bi bi-clock text-xs"></i> {job.experience}
+              <Clock size={14} /> {job.experience}
             </span>
           )}
         </div>
@@ -304,8 +304,7 @@ const Jobs = () => {
 
         <div className="flex justify-between items-center pt-3 border-t border-gray-100 mt-auto">
           <span className="text-xs text-gray-400 flex items-center gap-1">
-            <i className="bi bi-clock-history text-xs"></i> Posted{" "}
-            {formatDate(job.postedDate)}
+            <Clock size={14} /> Posted {formatDate(job.postedDate)}
           </span>
           <div className="flex gap-2">
             <button
@@ -463,34 +462,34 @@ const Jobs = () => {
           <div className="flex flex-wrap gap-2 mb-5">
             {filters.title && (
               <span className="inline-flex items-center gap-1.5 bg-white border border-teal-500 text-teal-600 text-xs font-medium px-3 py-1 rounded-full">
-                <i className="bi bi-search text-xs"></i> {filters.title}
+                <Search size={14} /> {filters.title}
                 <button
                   onClick={() => removeFilter("title")}
                   className="bg-none border-none cursor-pointer text-teal-600 text-sm leading-none p-0 flex items-center ml-1"
                 >
-                  <X size={18} />
+                  <X size={14} />
                 </button>
               </span>
             )}
             {filters.location && (
               <span className="inline-flex items-center gap-1.5 bg-white border border-teal-500 text-teal-600 text-xs font-medium px-3 py-1 rounded-full">
-                <i className="bi bi-geo-alt text-xs"></i> {filters.location}
+                <MapPin size={14} /> {filters.location}
                 <button
                   onClick={() => removeFilter("location")}
                   className="bg-none border-none cursor-pointer text-teal-600 text-sm leading-none p-0 flex items-center ml-1"
                 >
-                  <X />
+                  <X size={14} />
                 </button>
               </span>
             )}
             {filters.category && (
               <span className="inline-flex items-center gap-1.5 bg-white border border-teal-500 text-teal-600 text-xs font-medium px-3 py-1 rounded-full">
-                <i className="bi bi-tag text-xs"></i> {filters.category}
+                <Tags size={14} /> {filters.category}
                 <button
                   onClick={() => removeFilter("category")}
                   className="bg-none border-none cursor-pointer text-teal-600 text-sm leading-none p-0 flex items-center ml-1"
                 >
-                  <i className="bi bi-x"></i>
+                  <X size={14} />
                 </button>
               </span>
             )}
@@ -506,7 +505,7 @@ const Jobs = () => {
           ) : error ? (
             <div className="col-span-full text-center py-16">
               <div className="w-18 h-18 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4">
-                <ExclamationTriangle size={32} className="text-red-500" />
+                <AlertTriangle size={32} className="text-red-500" />
               </div>
               <h6 className="text-base font-bold text-navy-900 mb-2">
                 Error loading jobs
@@ -595,7 +594,7 @@ const Jobs = () => {
                 className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 cursor-pointer bg-transparent border-none"
                 onClick={() => setShowApplyModal(false)}
               >
-                <i className="bi bi-x-lg"></i>
+                <X size={18} />
               </button>
             </div>
             <div className="text-center py-6 px-6">
@@ -627,8 +626,7 @@ const Jobs = () => {
               >
                 {applying ? (
                   <>
-                    <HourglassSplit size={16} className="animate-spin" />{" "}
-                    Applying...
+                    <Loader size={16} className="animate-spin" /> Applying...
                   </>
                 ) : (
                   <>
@@ -659,7 +657,7 @@ const Jobs = () => {
                 className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 cursor-pointer bg-transparent border-none"
                 onClick={() => setShowLoginModal(false)}
               >
-                <i className="bi bi-x-lg"></i>
+                <X size={18} />
               </button>
             </div>
             <div className="text-center py-6 px-6">
@@ -683,7 +681,7 @@ const Jobs = () => {
                 onClick={redirectToLogin}
                 className="px-5 py-2 rounded-lg text-sm font-semibold border-none bg-[#091D33] text-white hover:bg-teal-600 transition-all flex items-center gap-2 cursor-pointer"
               >
-                <BoxArrowInRight size={16} /> Login to Apply
+                <LogIn size={16} /> Login to Apply
               </button>
             </div>
           </div>
