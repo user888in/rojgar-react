@@ -25,20 +25,20 @@ const BLOCKS = [
 
 export default function VisionMission() {
   return (
-    <section className="py-[100px] bg-white">
-      <div className="max-w-[1180px] mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+    <section className="bg-white py-[64px] sm:py-[100px]">
+      <div className="max-w-[1180px] mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
 
         {/* ── Image ── */}
         <div className="relative">
           <img
             src={aboutImg}
             alt="About RojgarShine"
-            className="w-full h-[520px] object-cover rounded-[24px] block"
+            className="w-full h-[260px] sm:h-[380px] lg:h-[520px] object-cover rounded-[24px] block"
           />
 
           {/* Accent card */}
-          <div className="absolute -bottom-6 -right-6 bg-[#091d33] text-white rounded-[16px] px-6 py-5 min-w-[180px] shadow-[0_20px_40px_rgba(9,29,51,0.25)]">
-            <div className="text-[2.2rem] font-extrabold text-[#18a99c] leading-none">
+          <div className="absolute -bottom-[14px] -right-[8px] bg-[#091d33] text-white rounded-[16px] px-[18px] py-[14px] min-w-[140px] shadow-[0_20px_40px_rgba(9,29,51,0.25)] sm:-bottom-[18px] sm:-right-[12px] sm:px-6 sm:py-5 sm:min-w-[180px] lg:-bottom-6 lg:-right-6">
+            <div className="text-[1.6rem] sm:text-[2.2rem] font-extrabold text-[#18a99c] leading-none">
               3+
             </div>
             <div className="text-[0.72rem] text-white/60 uppercase mt-1">
@@ -51,7 +51,10 @@ export default function VisionMission() {
         <div>
 
           {/* Section tag */}
-          <SectionTag text="Who We Are" color="#18a99c" />
+          <SectionTag
+            text="Who We Are"
+            colorClass="text-[#18a99c] before:bg-[#18a99c]"
+          />
 
           {/* Heading */}
           <h2 className="text-[clamp(2rem,4vw,2.8rem)] font-extrabold text-[#091d33] leading-[1.1] mb-8">
@@ -78,7 +81,7 @@ export default function VisionMission() {
                 </div>
 
                 {/* Block text */}
-                <p className="text-[0.95rem] text-slate-500 leading-[1.8] pl-[42px]">
+                <p className="text-[0.95rem] text-slate-500 leading-[1.8] pl-0 sm:pl-[42px]">
                   {block.text}
                 </p>
               </div>

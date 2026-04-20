@@ -64,30 +64,38 @@ export default function HeroStats({ statsConfig }) {
   }, []);
 
   return (
-    <div className="flex flex-wrap items-center justify-center mt-12">
-      {statsConfig.map(({ key, label }, index) => (
-        <div
-          key={key}
-          className={`px-8 py-2 text-center ${
-            index !== statsConfig.length - 1
-              ? 'border-r border-white/15'
-              : ''
-          }`}
-        >
+    <div className="mt-12 flex flex-wrap items-center justify-center gap-0">
+      {statsConfig.map(({ key, label }, index) => {
+        const total = statsConfig.length;
+        const isLast = index === total - 1;
+        const isLeftColumn = index % 2 === 0;
+        const isInLastRow =
+          Math.floor(index / 2) === Math.floor((total - 1) / 2);
+        const baseBorders = `${isInLastRow ? '' : 'border-b'} ${
+          isLeftColumn ? 'border-r' : ''
+        }`;
+        const desktopBorders = isLast ? 'sm:border-r-0' : 'sm:border-r';
+
+        return (
           <div
-            className={`text-3xl font-extrabold text-white leading-none transition-opacity duration-500 ${
-              loading ? 'opacity-40' : 'opacity-100'
-            }`}
+            key={key}
+            className={`w-1/2 px-[18px] py-[10px] text-center border-white/10 ${baseBorders} sm:w-auto sm:px-8 sm:py-2 sm:border-b-0 sm:border-white/15 ${desktopBorders}`.trim()}
           >
-            {counts[key] !== undefined
-              ? counts[key].toLocaleString()
-              : '—'}
+            <div
+              className={`text-3xl font-extrabold text-white leading-none transition-opacity duration-500 ${
+                loading ? 'opacity-40' : 'opacity-100'
+              }`}
+            >
+              {counts[key] !== undefined
+                ? counts[key].toLocaleString()
+                : '—'}
+            </div>
+            <div className="text-[0.72rem] text-white/50 uppercase tracking-wider mt-1">
+              {label}
+            </div>
           </div>
-          <div className="text-[0.72rem] text-white/50 uppercase tracking-wider mt-1">
-            {label}
-          </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
