@@ -17,17 +17,8 @@ export default function AboutHero() {
       {/* Dark gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-br from-[rgba(9,29,51,0.88)] to-[rgba(24,169,156,0.45)] z-10" />
 
-      {/* Grid texture overlay */}
-      <div
-        className="absolute inset-0 z-10 opacity-30"
-        style={{
-          backgroundImage: `
-            linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)
-          `,
-          backgroundSize: '60px 60px',
-        }}
-      />
+      {/* Grid texture overlay — pure Tailwind */}
+      <div className="absolute inset-0 z-10 bg-[linear-gradient(rgba(24,169,156,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(24,169,156,0.06)_1px,transparent_1px)] bg-[length:60px_60px]" />
 
       {/* Content */}
       <div className="relative z-20 text-center px-5 animate-[heroFadeUp_0.9s_cubic-bezier(.4,0,.2,1)_both]">
