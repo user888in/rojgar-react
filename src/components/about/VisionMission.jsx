@@ -29,7 +29,7 @@ export default function VisionMission() {
       <div className="max-w-[1180px] mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
 
         {/* ── Image ── */}
-        <div className="relative">
+        <div className="relative reveal">
           <img
             src={aboutImg}
             alt="About RojgarShine"
@@ -48,7 +48,7 @@ export default function VisionMission() {
         </div>
 
         {/* ── Text ── */}
-        <div>
+        <div className="reveal reveal-delay-1">
 
           {/* Section tag */}
           <SectionTag

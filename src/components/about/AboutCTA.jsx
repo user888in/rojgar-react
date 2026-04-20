@@ -5,7 +5,7 @@ import { BriefcaseBusiness, Search } from 'lucide-react';
 export default function AboutCTA() {
   return (
     <section className="bg-white px-4 py-[64px] text-center sm:px-6 sm:py-[90px]">
-      <div className="mx-auto max-w-[680px]">
+      <div className="reveal mx-auto max-w-[680px]">
         <SectionTag
           text="Get Started"
           colorClass="text-[#18a99c] before:bg-[#18a99c]"

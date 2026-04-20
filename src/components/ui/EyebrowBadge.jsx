@@ -6,7 +6,7 @@ export default function EyebrowBadge({
 }) {
   return (
     <div
-      className={`inline-flex items-center gap-2 bg-[rgba(24,169,156,0.2)] border border-[rgba(24,169,156,0.4)] text-[#5ee8dc] text-[0.72rem] font-bold uppercase px-[18px] py-[7px] rounded-full mb-7 backdrop-blur-sm ${className}`.trim()}
+      className={`inline-flex items-center gap-2 tracking-[2px] bg-[rgba(24,169,156,0.2)] border border-[rgba(24,169,156,0.4)] text-[#5ee8dc] text-[0.72rem] font-bold uppercase px-[18px] py-[7px] rounded-full mb-7 backdrop-blur-sm ${className}`.trim()}
     >
       {showPulse && (
         <span className="w-[6px] h-[6px] rounded-full bg-[#18a99c] animate-pulse" />

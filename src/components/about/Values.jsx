@@ -1,23 +1,24 @@
+import { ChartLine, Heart, ShieldCheck, Zap } from 'lucide-react';
 import SectionTag from '../ui/SectionTag';
 
 const VALUES = [
   {
-    icon: 'bi bi-shield-check',
+    icon: <ShieldCheck />,
     name: 'Trust',
     desc: 'We verify every profile and posting so you can connect with confidence.',
   },
   {
-    icon: 'bi bi-lightning-charge-fill',
+    icon: <Zap fill='#18a99c' />,
     name: 'Speed',
     desc: 'From application to offer — we eliminate friction at every step.',
   },
   {
-    icon: 'bi bi-heart-fill',
+    icon: <Heart fill='#18a99c' />,
     name: 'Empathy',
     desc: 'Job searching is personal. We design with human dignity in mind.',
   },
   {
-    icon: 'bi bi-graph-up-arrow',
+    icon: <ChartLine />,
     name: 'Growth',
     desc: 'We grow alongside our users — constantly improving and innovating.',
   },
@@ -28,7 +29,7 @@ export default function Values() {
     <section className="relative overflow-hidden bg-[#091d33] py-[56px] sm:py-[72px]">
       <div className="pointer-events-none absolute -top-[60px] -right-[60px] h-[300px] w-[300px] rounded-full bg-[radial-gradient(circle,rgba(24,169,156,0.12)_0%,transparent_70%)]" />
       <div className="relative z-10 mx-auto max-w-[1180px] px-6">
-        <div className="mb-12 flex flex-col items-start gap-6 lg:flex-row lg:items-end lg:justify-between">
+        <div className="reveal mb-12 flex flex-col items-start gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <SectionTag
               text="What Drives Us"
@@ -44,13 +45,15 @@ export default function Values() {
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {VALUES.map((value) => (
-            <div
-              key={value.name}
-              className="rounded-2xl border border-white/[0.08] bg-white/[0.04] px-[22px] py-[28px] transition-all duration-200 hover:-translate-y-1 hover:border-[rgba(24,169,156,0.3)] hover:bg-[rgba(24,169,156,0.1)]"
-            >
+          {VALUES.map((value, index) => {
+            const delayClass = index ? `reveal-delay-${index}` : '';
+            return (
+              <div
+                key={value.name}
+                className={`reveal rounded-2xl border border-white/[0.08] bg-white/[0.04] px-[22px] py-[28px] hover:border-[rgba(24,169,156,0.3)] hover:bg-[rgba(24,169,156,0.1)] ${delayClass}`.trim()}
+              >
               <div className="mb-[18px] flex h-[46px] w-[46px] items-center justify-center rounded-[12px] bg-[rgba(24,169,156,0.15)] text-[1.2rem] text-[#18a99c]">
-                <i className={value.icon}></i>
+                {value.icon}
               </div>
               <div className="mb-2 text-base font-bold text-white">
                 {value.name}
@@ -58,8 +61,9 @@ export default function Values() {
               <div className="text-[0.82rem] leading-[1.7] text-white/50">
                 {value.desc}
               </div>
-            </div>
-          ))}
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>

@@ -11,7 +11,7 @@ const STATS_CONFIG = [
 export default function AboutHero() {
   return (
     <section
-      className="relative min-h-[75vh] sm:min-h-[88vh] bg-cover bg-center flex items-center justify-center overflow-hidden"
+      className="about-hero relative min-h-[75vh] sm:min-h-[88vh] bg-cover bg-center flex items-center justify-center overflow-hidden"
       style={{ backgroundImage: `url(${heroBg})` }}
     >
 
@@ -22,7 +22,7 @@ export default function AboutHero() {
       <div className="absolute inset-0 z-10 bg-[linear-gradient(rgba(24,169,156,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(24,169,156,0.06)_1px,transparent_1px)] bg-[length:60px_60px]" />
 
       {/* Content */}
-      <div className="relative z-20 text-center px-5">
+      <div className="hero-content relative z-20 text-center px-5">
 
         {/* Eyebrow badge */}
         <EyebrowBadge text="Our Story" />

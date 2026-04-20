@@ -20,8 +20,7 @@ import {
   Loader,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-
-const API_BASE_URL = "https://developer.gspsagarwa.com/api";
+import { API_BASE_URL } from "../config/api";
 
 // Jobs Page Component
 const Jobs = () => {
