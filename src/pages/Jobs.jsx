@@ -12,7 +12,8 @@ import {
   Briefcase,
   AlertTriangle,
   RotateCw,
-  Lock,Tags,
+  Lock,
+  Tags,
   LogIn,
   ChevronLeft,
   ChevronRight,
@@ -499,9 +500,7 @@ const Jobs = () => {
         {/* Job Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {loading ? (
-            <div className="text-center">
-              <p className="text-center text-lg">Loading Jobs</p>
-            </div>
+            <></>
           ) : error ? (
             <div className="col-span-full text-center py-16">
               <div className="w-18 h-18 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4">
