@@ -188,7 +188,7 @@ const Blog = () => {
         articleCount={displayTotal}
         currentPage={currentPage}
         totalPages={displayPages}
-        showFeatured={currentPage === 1 && !searchQuery && currentCat === 'all'}
+        showFeatured={currentPage === 1 && filteredPosts.length > 0}
         featuredPost={filteredPosts[0]}
         onPageChange={handlePageChange}
         trendingPosts={allPosts}

@@ -21,6 +21,9 @@ export default function BlogMain({
 }) {
   const hasFeatured = showFeatured && featuredPost;
   const gridPosts = hasFeatured ? posts.slice(1) : posts;
+  const latestCount = hasFeatured
+    ? Math.max(articleCount - 1, 0)
+    : articleCount;
 
   return (
     <section className="blog-main">
@@ -32,15 +35,6 @@ export default function BlogMain({
             ) : (
               <>
                 {hasFeatured && <BlogFeaturedCard post={featuredPost} />}
-                <div className="blog-section-label fade-up" style={{ marginTop: '8px' }}>
-                  <span className="blog-section-pill">
-                    <BookOpen size={14} /> Latest Articles
-                  </span>
-                  <div className="blog-section-line"></div>
-                  <span className="blog-section-count">
-                    {articleCount} article{articleCount !== 1 ? 's' : ''}
-                  </span>
-                </div>
                 <div className="blog-grid">
                   {gridPosts.map((post, index) => (
                     <BlogCard key={post.id || post.slug || index} post={post} delay={index * 0.06} />
@@ -55,6 +49,17 @@ export default function BlogMain({
                     <p>Try a different category or search term.</p>
                   </div>
                 )}
+                <div
+                  className="blog-section-label fade-up"
+                  style={{ marginTop: '8px', justifyContent: 'space-between' }}
+                >
+                  <span className="blog-section-pill">
+                    <BookOpen size={14} /> Latest Articles
+                  </span>
+                  <span className="blog-section-count">
+                    {latestCount} article{latestCount !== 1 ? 's' : ''}
+                  </span>
+                </div>
                 <BlogPagination
                   currentPage={currentPage}
                   totalPages={totalPages}

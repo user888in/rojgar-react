@@ -543,7 +543,10 @@
   white-space: nowrap;
   flex-shrink: 0;
 }
-.blog-section-line { flex: 1; height: 1px; background: var(--border); }
+.blog-section-line {
+  opacity: 0;
+  background: transparent;
+}
 .blog-section-count {
   font-size: .72rem;
   color: var(--muted);
@@ -734,7 +737,7 @@
 }
 .blog-widget-head {
   padding: 14px 18px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: none;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -744,7 +747,7 @@
   letter-spacing: 1.2px;
   color: var(--cyan);
 }
-.blog-widget-head::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.blog-widget-head::after { display: none; }
 .blog-widget-body { padding: 14px 18px; }
 .trending-list { list-style: none; padding: 0; margin: 0; }
 .trending-item {
