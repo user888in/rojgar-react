@@ -84,7 +84,7 @@ const Jobs = () => {
       //         If SecurityConfig has: .requestMatchers(HttpMethod.GET, "/api/jobs/**").permitAll()
       //         Then API_BASE_URL should end with /api  →  e.g. "https://tunnel.com/api"
       //         So the final URL becomes: https://tunnel.com/api/jobs?page=1&limit=9
-      const response = await fetch(`${API_BASE_URL}/jobs/openjobs`, {
+      const response = await fetch(`${API_BASE_URL}/jobs/openjobs?${params}`, {
         headers: {
           "Content-Type": "application/json",
           // FIX 3: Always send Authorization header structure correctly
@@ -96,7 +96,7 @@ const Jobs = () => {
       //         the endpoint is not permitted in SecurityConfig, not an auth error.
       if (response.status === 401) {
         throw new Error(
-          "Jobs endpoint returned 401. Check SecurityConfig — /api/jobs/** must be permitAll() for GET requests."
+          "Jobs endpoint returned 401. Check SecurityConfig — /api/jobs/** must be permitAll() for GET requests.",
         );
       }
 
@@ -139,10 +139,10 @@ const Jobs = () => {
   const clearFilters = () => {
     setFilters({ title: "", location: "", category: "" });
     setCurrentPage(1);
-    const titleInput    = document.getElementById("searchTitle");
+    const titleInput = document.getElementById("searchTitle");
     const locationInput = document.getElementById("searchLocation");
     const categoryInput = document.getElementById("searchCategory");
-    if (titleInput)    titleInput.value    = "";
+    if (titleInput) titleInput.value = "";
     if (locationInput) locationInput.value = "";
     if (categoryInput) categoryInput.value = "";
   };
@@ -151,7 +151,7 @@ const Jobs = () => {
   const removeFilter = (key) => {
     setFilters((prev) => ({ ...prev, [key]: "" }));
     const inputMap = {
-      title:    "searchTitle",
+      title: "searchTitle",
       location: "searchLocation",
       category: "searchCategory",
     };
@@ -209,8 +209,8 @@ const Jobs = () => {
           prev.map((job) =>
             job.id === selectedJob.id
               ? { ...job, status: "APPLIED", hasApplied: true }
-              : job
-          )
+              : job,
+          ),
         );
       }
     } catch (err) {
@@ -246,8 +246,8 @@ const Jobs = () => {
   // Format date
   const formatDate = (dateStr) => {
     if (!dateStr) return "Recently";
-    const date     = new Date(dateStr);
-    const now      = new Date();
+    const date = new Date(dateStr);
+    const now = new Date();
     const diffTime = Math.abs(now.getTime() - date.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     if (diffDays === 1) return "1 day ago";
@@ -281,27 +281,87 @@ const Jobs = () => {
   };
 
   // ── Job Card ───────────────────────────────────────────────────────────────
-  const JobCard = ({ job }) => {
-    const hasApplied = appliedJobs.has(job.id) || job.hasApplied || job.status === "APPLIED";
-    const isClosed   = job.status === "CLOSED";
-    const canApply   = !isClosed && !hasApplied;
+  // Helper function to strip HTML tags
+  const stripHtml = (html, maxLen = 120) => {
+    if (!html) return "No description available.";
+
+    const temp = document.createElement("div");
+    temp.innerHTML = html;
+    let text = temp.textContent || temp.innerText || "";
+    text = text.replace(/\s+/g, " ").trim();
+
+    if (maxLen && text.length > maxLen) {
+      text = text.substring(0, maxLen) + "...";
+    }
+
+    return text || "No description available.";
+  };
+
+  // Job Card Component
+  const JobCard = ({ job, appliedJobs, onApply, onViewDetails, onShare }) => {
+    const jobId = job.jobId || job.id;
+    const hasApplied = appliedJobs?.has(Number(jobId)) || false;
+    const isClosed = job.status === "CLOSED";
+    const canApply = !isClosed && !hasApplied;
+    const companyName = job.companyName || job.company || "Company";
+    const companyLogo = job.companyLogo;
+    const location = job.location || "Remote";
+    const salary = job.salary
+      ? `₹ ${Number(job.salary).toLocaleString("en-IN")}`
+      : "Not disclosed";
+    const category = job.categoryName || job.category || "General";
+    const experience = job.experienceRequired || job.experience;
+    const description = stripHtml(job.description || job.jobDescription, 120);
+    const createdAt = job.createdAt || job.postedDate;
+    console.log(jobs)
+    const getInitials = () => {
+      return companyName
+        .split(" ")
+        .map((w) => w[0])
+        .join("")
+        .substring(0, 2)
+        .toUpperCase();
+    };
+
+    const formatDate = (dateStr) => {
+      if (!dateStr) return "Recently posted";
+      try {
+        return new Date(dateStr).toLocaleDateString("en-IN", {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+        });
+      } catch {
+        return "Recently posted";
+      }
+    };
 
     return (
-      <div className="bg-white border border-gray-200 rounded-2xl p-5 h-full flex flex-col transition-all duration-200 hover:shadow-lg hover:-translate-y-1 hover:border-teal-400 relative group">
+      <div className="bg-white border border-gray-200 rounded-2xl p-5 h-full flex flex-col transition-all duration-200 hover:shadow-2xl hover:-translate-y-1 hover:border-gray-300 relative group">
+        {/* Share Button */}
         <button
-          onClick={(e) => shareJob(job, e)}
+          onClick={(e) => onShare?.(job, e)}
           className="absolute top-3 right-3 w-7 h-7 rounded-lg border border-gray-200 bg-gray-50 text-gray-500 flex items-center justify-center cursor-pointer transition-all hover:bg-teal-50 hover:text-teal-600 hover:border-teal-400 z-10"
           title="Share this job"
         >
           <Share2 size={16} />
         </button>
 
-        <div className="flex items-start gap-3">
+        {/* Company Logo & Title */}
+        <div className="flex items-start gap-3 mb-3">
           <div className="min-w-[44px] w-12 h-11 rounded-xl bg-gray-100 border border-gray-200 flex items-center justify-center font-extrabold text-sm text-navy-900 flex-shrink-0 overflow-hidden">
-            {job.companyLogo ? (
-              <img src={job.companyLogo} alt={job.company} className="w-full h-full object-cover" />
+            {companyLogo ? (
+              <img
+                src={companyLogo}
+                alt={companyName}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.target.style.display = "none";
+                  e.target.parentElement.textContent = getInitials();
+                }}
+              />
             ) : (
-              job.company?.charAt(0) || "C"
+              getInitials()
             )}
           </div>
           <div className="flex-1">
@@ -309,49 +369,50 @@ const Jobs = () => {
               {job.title}
             </h3>
             <div className="flex items-center gap-1.5 text-sm text-gray-500">
-              <span className="truncate">{job.company}</span>
+              <span className="truncate">{companyName}</span>
               <span className="w-1.5 h-1.5 rounded-full bg-green-500 flex-shrink-0"></span>
-              <span className="text-xs text-gray-400 flex-shrink-0">
-                {job.employeeCount || "10-50"} employees
-              </span>
             </div>
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-2 my-3">
+        {/* Job Tags - Location and Category in one row, Salary at the end */}
+        <div className="flex flex-wrap items-center gap-2 my-3">
           <span className="inline-flex items-center gap-1 text-xs font-medium text-gray-500 bg-gray-100 rounded-md px-2.5 py-1">
-            <MapPin size={14} /> {job.location}
-          </span>
-          <span className="inline-flex items-center gap-1 text-xs font-medium text-teal-700 bg-teal-50 rounded-md px-2.5 py-1">
-            ₹ {job.salary}
+            <MapPin size={14} /> {location}
           </span>
           <span className="inline-flex items-center gap-1 text-xs font-medium text-gray-500 bg-gray-100 rounded-md px-2.5 py-1">
-            <Briefcase size={14} /> {job.category}
+            <Briefcase size={14} /> {category}
           </span>
-          {job.experience && (
+          {experience && (
             <span className="inline-flex items-center gap-1 text-xs font-medium text-gray-500 bg-gray-100 rounded-md px-2.5 py-1">
-              <Clock size={14} /> {job.experience}
+              <Clock size={14} /> {experience}
             </span>
           )}
+          {/* Salary - at the end of same line */}
+          <span className="inline-flex items-center gap-1 text-xs font-medium text-teal-700 bg-teal-50 rounded-md px-2.5 py-1">
+            {salary}
+          </span>
         </div>
 
+        {/* Description - CLEAN HTML STRIPPED */}
         <p className="text-sm text-gray-600 leading-relaxed flex-1 mb-4 line-clamp-3">
-          {job.description}
+          {description}
         </p>
 
+        {/* Footer */}
         <div className="flex justify-between items-center pt-3 border-t border-gray-100 mt-auto">
           <span className="text-xs text-gray-400 flex items-center gap-1">
-            <Clock size={14} /> Posted {formatDate(job.postedDate)}
+            <Clock size={14} /> Posted {formatDate(createdAt)}
           </span>
           <div className="flex gap-2">
             <button
-              onClick={() => viewJobDetails(job.id)}
+              onClick={() => onViewDetails?.(jobId)}
               className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold border border-gray-200 bg-transparent text-navy-900 hover:border-navy-900 hover:bg-gray-50 transition-all cursor-pointer"
             >
               <Eye size={16} /> View
             </button>
             <button
-              onClick={() => handleApplyClick(job)}
+              onClick={() => onApply?.(job)}
               disabled={!canApply}
               className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-semibold border-none transition-all cursor-pointer ${
                 !canApply
@@ -362,15 +423,36 @@ const Jobs = () => {
               }`}
             >
               {isClosed ? (
-                <><XCircle size={16} /> Closed</>
+                <>
+                  <XCircle size={16} /> Closed
+                </>
               ) : hasApplied ? (
-                <><CheckCircle size={16} /> Applied</>
+                <>
+                  <CheckCircle size={16} /> Applied
+                </>
               ) : (
-                <><Send size={16} /> Apply</>
+                <>
+                  <Send size={16} /> Apply
+                </>
               )}
             </button>
           </div>
         </div>
+
+        <style>{`
+        .line-clamp-1 {
+          display: -webkit-box;
+          -webkit-line-clamp: 1;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+        .line-clamp-3 {
+          display: -webkit-box;
+          -webkit-line-clamp: 3;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+      `}</style>
       </div>
     );
   };
@@ -380,7 +462,10 @@ const Jobs = () => {
       {/* Hero Section */}
       <section
         className="relative overflow-hidden py-14 pb-18"
-        style={{ background: "linear-gradient(135deg, #0f172a 0%, #1a2a3a 50%, #0f172a 100%)" }}
+        style={{
+          background:
+            "linear-gradient(135deg, #0f172a 0%, #1a2a3a 50%, #0f172a 100%)",
+        }}
       >
         <div className="absolute inset-0 bg-[linear-gradient(rgba(24,169,156,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(24,169,156,0.06)_1px,transparent_1px)] bg-[length:40px_40px] pointer-events-none"></div>
         <div className="container mx-auto px-4 relative z-10">
@@ -389,7 +474,8 @@ const Jobs = () => {
               Find Your <span className="text-teal-500">Dream Job</span>
             </h1>
             <p className="text-white/50 text-base mb-8">
-              Search thousands of verified openings from top companies across India
+              Search thousands of verified openings from top companies across
+              India
             </p>
             <div className="bg-white rounded-2xl p-2 flex flex-col md:flex-row items-stretch gap-0 shadow-xl">
               <div className="flex items-center gap-1 flex-1 px-3 py-2 md:border-r border-gray-200">
@@ -400,7 +486,9 @@ const Jobs = () => {
                   placeholder="Job title, skills, keywords..."
                   className="border-none outline-none text-sm text-navy-900 bg-transparent w-full placeholder:text-gray-400"
                   defaultValue={filters.title}
-                  onChange={(e) => setFilters((prev) => ({ ...prev, title: e.target.value }))}
+                  onChange={(e) =>
+                    setFilters((prev) => ({ ...prev, title: e.target.value }))
+                  }
                   onKeyPress={(e) => e.key === "Enter" && handleSearch()}
                 />
               </div>
@@ -412,7 +500,12 @@ const Jobs = () => {
                   placeholder="City, state or remote..."
                   className="border-none outline-none text-sm text-navy-900 bg-transparent w-full placeholder:text-gray-400"
                   defaultValue={filters.location}
-                  onChange={(e) => setFilters((prev) => ({ ...prev, location: e.target.value }))}
+                  onChange={(e) =>
+                    setFilters((prev) => ({
+                      ...prev,
+                      location: e.target.value,
+                    }))
+                  }
                   onKeyPress={(e) => e.key === "Enter" && handleSearch()}
                 />
               </div>
@@ -424,7 +517,12 @@ const Jobs = () => {
                   placeholder="Category..."
                   className="border-none outline-none text-sm text-navy-900 bg-transparent w-full placeholder:text-gray-400"
                   defaultValue={filters.category}
-                  onChange={(e) => setFilters((prev) => ({ ...prev, category: e.target.value }))}
+                  onChange={(e) =>
+                    setFilters((prev) => ({
+                      ...prev,
+                      category: e.target.value,
+                    }))
+                  }
                   onKeyPress={(e) => e.key === "Enter" && handleSearch()}
                 />
               </div>
@@ -443,9 +541,12 @@ const Jobs = () => {
       <section className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-5 flex-wrap gap-2">
           <div>
-            <div className="text-lg font-bold text-navy-900">Open Positions</div>
+            <div className="text-lg font-bold text-navy-900">
+              Open Positions
+            </div>
             <div className="text-sm text-gray-500 mt-1">
-              <span className="font-bold text-teal-600">{totalJobs}</span> jobs found
+              <span className="font-bold text-teal-600">{totalJobs}</span> jobs
+              found
             </div>
           </div>
           {activeFiltersCount > 0 && (
@@ -463,7 +564,10 @@ const Jobs = () => {
             {filters.title && (
               <span className="inline-flex items-center gap-1.5 bg-white border border-teal-500 text-teal-600 text-xs font-medium px-3 py-1 rounded-full">
                 <Search size={14} /> {filters.title}
-                <button onClick={() => removeFilter("title")} className="bg-none border-none cursor-pointer text-teal-600 text-sm leading-none p-0 flex items-center ml-1">
+                <button
+                  onClick={() => removeFilter("title")}
+                  className="bg-none border-none cursor-pointer text-teal-600 text-sm leading-none p-0 flex items-center ml-1"
+                >
                   <X size={14} />
                 </button>
               </span>
@@ -471,7 +575,10 @@ const Jobs = () => {
             {filters.location && (
               <span className="inline-flex items-center gap-1.5 bg-white border border-teal-500 text-teal-600 text-xs font-medium px-3 py-1 rounded-full">
                 <MapPin size={14} /> {filters.location}
-                <button onClick={() => removeFilter("location")} className="bg-none border-none cursor-pointer text-teal-600 text-sm leading-none p-0 flex items-center ml-1">
+                <button
+                  onClick={() => removeFilter("location")}
+                  className="bg-none border-none cursor-pointer text-teal-600 text-sm leading-none p-0 flex items-center ml-1"
+                >
                   <X size={14} />
                 </button>
               </span>
@@ -479,7 +586,10 @@ const Jobs = () => {
             {filters.category && (
               <span className="inline-flex items-center gap-1.5 bg-white border border-teal-500 text-teal-600 text-xs font-medium px-3 py-1 rounded-full">
                 <Tags size={14} /> {filters.category}
-                <button onClick={() => removeFilter("category")} className="bg-none border-none cursor-pointer text-teal-600 text-sm leading-none p-0 flex items-center ml-1">
+                <button
+                  onClick={() => removeFilter("category")}
+                  className="bg-none border-none cursor-pointer text-teal-600 text-sm leading-none p-0 flex items-center ml-1"
+                >
                   <X size={14} />
                 </button>
               </span>
@@ -498,7 +608,9 @@ const Jobs = () => {
               <div className="w-18 h-18 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4">
                 <AlertTriangle size={32} className="text-red-500" />
               </div>
-              <h6 className="text-base font-bold text-navy-900 mb-2">Error loading jobs</h6>
+              <h6 className="text-base font-bold text-navy-900 mb-2">
+                Error loading jobs
+              </h6>
               <p className="text-sm text-gray-500 mb-1">{error}</p>
               {/* FIX 6: Show helpful debug info in development */}
               <p className="text-xs text-gray-400">
@@ -518,7 +630,9 @@ const Jobs = () => {
               <div className="w-18 h-18 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
                 <Briefcase size={32} className="text-gray-400" />
               </div>
-              <h6 className="text-base font-bold text-navy-900 mb-2">No jobs found</h6>
+              <h6 className="text-base font-bold text-navy-900 mb-2">
+                No jobs found
+              </h6>
               <p className="text-sm text-gray-500">
                 Try adjusting your search filters or check back later
               </p>
@@ -571,10 +685,18 @@ const Jobs = () => {
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
           onClick={() => setShowApplyModal(false)}
         >
-          <div className="bg-white rounded-2xl max-w-md w-full mx-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="bg-white rounded-2xl max-w-md w-full mx-4 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="relative border-b border-gray-100 px-6 pt-5 pb-2">
-              <h5 className="font-bold text-lg text-navy-900">Confirm Application</h5>
-              <button className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 cursor-pointer bg-transparent border-none" onClick={() => setShowApplyModal(false)}>
+              <h5 className="font-bold text-lg text-navy-900">
+                Confirm Application
+              </h5>
+              <button
+                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 cursor-pointer bg-transparent border-none"
+                onClick={() => setShowApplyModal(false)}
+              >
                 <X size={18} />
               </button>
             </div>
@@ -583,14 +705,21 @@ const Jobs = () => {
                 <Send size={32} className="text-teal-600" />
               </div>
               <p className="text-sm text-gray-500 mb-1">Applying for</p>
-              <h6 className="font-bold text-base text-navy-900">{selectedJob.title}</h6>
-              <p className="text-xs text-gray-500 mt-2">at {selectedJob.company}</p>
+              <h6 className="font-bold text-base text-navy-900">
+                {selectedJob.title}
+              </h6>
+              <p className="text-xs text-gray-500 mt-2">
+                at {selectedJob.company}
+              </p>
               <p className="text-xs text-gray-500 mt-3">
                 Your saved profile and resume will be shared with the recruiter.
               </p>
             </div>
             <div className="border-t border-gray-100 px-6 py-4 flex justify-center gap-3">
-              <button className="px-5 py-2 rounded-lg text-sm font-semibold border border-gray-200 bg-transparent text-navy-900 hover:border-navy-900 hover:bg-gray-50 transition-all cursor-pointer" onClick={() => setShowApplyModal(false)}>
+              <button
+                className="px-5 py-2 rounded-lg text-sm font-semibold border border-gray-200 bg-transparent text-navy-900 hover:border-navy-900 hover:bg-gray-50 transition-all cursor-pointer"
+                onClick={() => setShowApplyModal(false)}
+              >
                 Cancel
               </button>
               <button
@@ -598,7 +727,15 @@ const Jobs = () => {
                 disabled={applying}
                 className="px-5 py-2 rounded-lg text-sm font-semibold border-none bg-[#091D33] text-white hover:bg-teal-600 transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2 cursor-pointer"
               >
-                {applying ? <><Loader size={16} className="animate-spin" /> Applying...</> : <><Send size={16} /> Confirm Apply</>}
+                {applying ? (
+                  <>
+                    <Loader size={16} className="animate-spin" /> Applying...
+                  </>
+                ) : (
+                  <>
+                    <Send size={16} /> Confirm Apply
+                  </>
+                )}
               </button>
             </div>
           </div>
@@ -611,10 +748,18 @@ const Jobs = () => {
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
           onClick={() => setShowLoginModal(false)}
         >
-          <div className="bg-white rounded-2xl max-w-md w-full mx-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="bg-white rounded-2xl max-w-md w-full mx-4 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="relative border-b border-gray-100 px-6 pt-5 pb-2">
-              <h5 className="font-bold text-lg text-navy-900">Login Required</h5>
-              <button className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 cursor-pointer bg-transparent border-none" onClick={() => setShowLoginModal(false)}>
+              <h5 className="font-bold text-lg text-navy-900">
+                Login Required
+              </h5>
+              <button
+                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 cursor-pointer bg-transparent border-none"
+                onClick={() => setShowLoginModal(false)}
+              >
                 <X size={18} />
               </button>
             </div>
@@ -624,14 +769,21 @@ const Jobs = () => {
               </div>
               <h6 className="font-bold text-base mb-2">Sign in to apply</h6>
               <p className="text-sm text-gray-500">
-                Create a free account or login to apply for jobs and track your applications.
+                Create a free account or login to apply for jobs and track your
+                applications.
               </p>
             </div>
             <div className="border-t border-gray-100 px-6 py-4 flex justify-center gap-3">
-              <button className="px-5 py-2 rounded-lg text-sm font-semibold border border-gray-200 bg-transparent text-navy-900 hover:border-navy-900 hover:bg-gray-50 transition-all cursor-pointer" onClick={() => setShowLoginModal(false)}>
+              <button
+                className="px-5 py-2 rounded-lg text-sm font-semibold border border-gray-200 bg-transparent text-navy-900 hover:border-navy-900 hover:bg-gray-50 transition-all cursor-pointer"
+                onClick={() => setShowLoginModal(false)}
+              >
                 Cancel
               </button>
-              <button onClick={redirectToLogin} className="px-5 py-2 rounded-lg text-sm font-semibold border-none bg-[#091D33] text-white hover:bg-teal-600 transition-all flex items-center gap-2 cursor-pointer">
+              <button
+                onClick={redirectToLogin}
+                className="px-5 py-2 rounded-lg text-sm font-semibold border-none bg-[#091D33] text-white hover:bg-teal-600 transition-all flex items-center gap-2 cursor-pointer"
+              >
                 <LogIn size={16} /> Login to Apply
               </button>
             </div>
