@@ -237,7 +237,7 @@ const Feedback = () => {
           <div className="grid grid-cols-3 gap-5 max-[991px]:grid-cols-2 max-[600px]:grid-cols-1">
             {loading && <FeedbackSkeleton count={PAGE_SIZE} />}
             {!loading && error && (
-              <FeedbackEmpty icon="bi-exclamation-circle" title="Failed to load reviews">
+              <FeedbackEmpty icon="" title="Failed to load reviews">
                 <p className="text-[0.875rem] text-[#64748b]">
                   Please try refreshing.
                   <br />
@@ -247,7 +247,7 @@ const Feedback = () => {
             )}
             {!loading && !error && items.length === 0 && (
               <FeedbackEmpty
-                icon="bi-chat-slash"
+                icon=''
                 title="No reviews found"
                 message="Try changing the filters or search term."
               />

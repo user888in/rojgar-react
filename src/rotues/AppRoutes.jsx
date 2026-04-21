@@ -7,6 +7,7 @@ import Blog from "../pages/Blog";
 import Services from "../pages/Services";
 import Feedback from "../pages/Feedback";
 
+
 const AppRoutes = () => {
   return (
     <Routes>
@@ -16,6 +17,8 @@ const AppRoutes = () => {
       <Route path="/blog" element={<Blog />} />
       <Route path="/services" element={<Services />} />
       <Route path="/feedback" element={<Feedback />} />
+
+      
     </Routes>
   );
 };
