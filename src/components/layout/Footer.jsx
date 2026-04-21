@@ -18,8 +18,8 @@ const socialLinks = [
 ];
 
 const recruiterTools = [
-  { label: 'Post a Job', to: '/recruiter/job-post' },
-  { label: 'Manage Jobs', to: '/recruiter/manage-jobs' },
+  { label: 'Post a Job', to: '/recruiter/post-job' },
+  { label: 'Manage Jobs', to: '/recruiter/jobs' },
   { label: 'Applications', to: '/recruiter/applications' },
   { label: 'Dashboard', to: '/recruiter/dashboard' },
 ];
@@ -27,7 +27,7 @@ const recruiterTools = [
 const recruiterLinks = [
   { label: 'Create Account', to: '/recruiter/register' },
   { label: 'Sign In', to: '/recruiter/login' },
-  { label: 'Give Feedback', to: '/recruiter/feedback' },
+  { label: 'Give Feedback', to: '/feedback' },
   { label: 'For Job Seekers', to: '/' },
 ];
 
