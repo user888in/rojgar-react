@@ -34,7 +34,7 @@ import hyderabad from "../assets/images/hyderabad.png";
 import kolkata from "../assets/images/kolkata.png";
 import delhi from "../assets/images/delhi-ncr.png";
 import ahmedabad from "../assets/images/ahmedabad.png";
-import banner from "../assets/images/Rojgarshine Website Banner.png"
+import banner from "../assets/images/Rojgarshine Website Banner.png";
 // Helper functions
 const fbDmInitials = (name) => {
   return (name || "?")
@@ -211,16 +211,21 @@ const Home = () => {
   // Load hero stats
   const loadHeroStats = useCallback(async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/public/stats`, {
-        credentials: "include",
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/public/jobcompanyjobseeker`,
+        {
+          credentials: "include",
+        },
+      );
       if (response.ok) {
         const data = await response.json();
         setStats({
           activeJobs: data.activeJobs?.toLocaleString() || "0",
-          companies: data.companies?.toLocaleString() || "0",
-          jobSeekers: data.jobSeekers?.toLocaleString() || "0",
+          companies: data.totalCompanies?.toLocaleString() || "0",
+          jobSeekers: data.totalJobSeekers?.toLocaleString() || "0",
         });
+      } else {
+        console.error(`Stats API error: HTTP ${response.status}`);
       }
     } catch (error) {
       console.error("Failed to load stats:", error);
@@ -237,6 +242,8 @@ const Home = () => {
         const data = await response.json();
         setCompanies(data);
         setTotalSteps(Math.ceil(data.length / CARDS_PER_STEP));
+      } else {
+        console.error(`Companies API error: HTTP ${response.status}`);
       }
     } catch (error) {
       console.error("Failed to load companies:", error);
@@ -255,6 +262,13 @@ const Home = () => {
           credentials: "include",
         }),
       ]);
+
+      if (!feedRes.ok) {
+        console.error(`Feedback API error: HTTP ${feedRes.status}`);
+      }
+      if (!statsRes.ok) {
+        console.error(`Feedback stats API error: HTTP ${statsRes.status}`);
+      }
 
       if (feedRes.ok) {
         const data = await feedRes.json();
@@ -832,7 +846,7 @@ const Home = () => {
               <div className="flex flex-wrap gap-7 mt-8">
                 <div className="flex flex-col">
                   <strong className="text-2xl font-extrabold text-white">
-                    {stats.activeJobs}
+                    {stats.activeJobs}+
                   </strong>
                   <span className="text-[0.75rem] text-white/50 mt-px">
                     Active Jobs
@@ -840,7 +854,7 @@ const Home = () => {
                 </div>
                 <div className="flex flex-col">
                   <strong className="text-2xl font-extrabold text-white">
-                    {stats.companies}
+                    {stats.companies}+
                   </strong>
                   <span className="text-[0.75rem] text-white/50 mt-px">
                     Companies
@@ -848,7 +862,7 @@ const Home = () => {
                 </div>
                 <div className="flex flex-col">
                   <strong className="text-2xl font-extrabold text-white">
-                    {stats.jobSeekers}
+                    {stats.jobSeekers}+
                   </strong>
                   <span className="text-[0.75rem] text-white/50 mt-px">
                     Job Seekers
@@ -1403,11 +1417,7 @@ const Home = () => {
 
       {/* Pre-footer */}
       <section className="overflow-hidden">
-        <img
-          src={banner}
-          alt=""
-          className="min-h-[300px] w-full block"
-        />
+        <img src={banner} alt="" className="min-h-[300px] w-full block" />
       </section>
 
       {/* Feedback Detail Modal */}
