@@ -34,7 +34,7 @@ export default function BlogMain({
               <BlogSkeleton />
             ) : (
               <>
-                {hasFeatured && <BlogFeaturedCard post={featuredPost} />}
+                {hasFeatured && <BlogFeaturedCard key={featuredPost?.id || 'featured'} post={featuredPost} />}
                 <div className="blog-grid">
                   {gridPosts.map((post, index) => (
                     <BlogCard key={post.id || post.slug || index} post={post} delay={index * 0.06} />

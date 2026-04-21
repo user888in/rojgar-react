@@ -7,10 +7,6 @@ export default function BlogFeaturedCard({ post }) {
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
-    setIndex(0);
-  }, [post]);
-
-  useEffect(() => {
     if (images.length <= 1) return undefined;
     const timer = setInterval(() => {
       setIndex((prev) => (prev + 1) % images.length);
