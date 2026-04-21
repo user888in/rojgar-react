@@ -20,6 +20,7 @@ import {
   Loader,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "../config/api";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -35,6 +36,7 @@ const getToken = () => localStorage.getItem(TOKEN_KEY);
 
 // Jobs Page Component
 const Jobs = () => {
+  const navigate = useNavigate();
   const [jobs, setJobs] = useState([]);
   const [totalJobs, setTotalJobs] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -220,21 +222,21 @@ const Jobs = () => {
     }
   };
 
-  // Redirect to login page
+  // Redirect to login page - FIXED to use React Router navigation
   const redirectToLogin = () => {
     const returnUrl = encodeURIComponent(window.location.pathname);
-    window.location.href = `/login.html?return=${returnUrl}`;
+    navigate(`/login?return=${returnUrl}`);
   };
 
-  // View job details
+  // View job details - FIXED to use React Router navigation
   const viewJobDetails = (jobId) => {
-    window.location.href = `/job-details.html?id=${jobId}`;
+    navigate(`/job-details/${jobId}`);
   };
 
   // Share job
   const shareJob = async (job, e) => {
     e.stopPropagation();
-    const shareUrl = `${window.location.origin}/job-details.html?id=${job.id}`;
+    const shareUrl = `${window.location.origin}/job-details/${job.id}`;
     try {
       await navigator.clipboard.writeText(shareUrl);
       alert("Job link copied to clipboard!");
@@ -624,7 +626,16 @@ const Jobs = () => {
               </button>
             </div>
           ) : jobs.length > 0 ? (
-            jobs.map((job) => <JobCard key={job.id} job={job} />)
+            jobs.map((job) => (
+              <JobCard
+                key={job.id}
+                job={job}
+                appliedJobs={appliedJobs}
+                onApply={handleApplyClick}
+                onViewDetails={viewJobDetails}
+                onShare={shareJob}
+              />
+            ))
           ) : (
             <div className="col-span-full text-center py-16">
               <div className="w-18 h-18 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
