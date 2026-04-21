@@ -18,17 +18,17 @@ const socialLinks = [
 ];
 
 const recruiterTools = [
-  { label: 'Post a Job', to: '/recruiter/post-job' },
-  { label: 'Manage Jobs', to: '/recruiter/jobs' },
-  { label: 'Applications', to: '/recruiter/applications' },
-  { label: 'Dashboard', to: '/recruiter/dashboard' },
+  { label: 'Home', to: '/' },
+  { label: 'Browse Jobs', to: '/jobs' },
+  { label: 'Companies', to: '/companies' },
+  { label: 'Blog', to: '/blog' },
 ];
 
 const recruiterLinks = [
-  { label: 'Create Account', to: '/recruiter/register' },
-  { label: 'Sign In', to: '/recruiter/login' },
-  { label: 'Give Feedback', to: '/feedback' },
-  { label: 'For Job Seekers', to: '/' },
+  { label: 'Create Profile', to: '/' },
+  { label: 'Search Jobs', to: '/jobs' },
+  { label: 'Upload Resume', to: '/' },
+  { label: 'Career Tips', to: '/' },
 ];
 
 const bottomLinks = [
@@ -37,7 +37,7 @@ const bottomLinks = [
   { label: 'Cookie Policy', href: '#' },
 ];
 
-export default function RecruiterFooter() {
+export default function PublicFooter() {
   return (
     <footer className="relative overflow-hidden bg-[#091d33] pt-11 text-white">
       <div className="pointer-events-none absolute -right-25 -top-25 h-100 w-100 rounded-full bg-[radial-gradient(circle,rgba(24,169,156,0.12)_0%,transparent_70%)]" />
@@ -46,7 +46,7 @@ export default function RecruiterFooter() {
       <div className="relative mx-auto max-w-300 px-7">
         <div className="grid gap-10 pb-12 lg:grid-cols-[1.6fr_1fr_1fr_1.3fr] md:grid-cols-2">
           <div>
-            <Link to="/recruiter" className="inline-flex items-center gap-3">
+            <Link to="/" className="inline-flex items-center gap-3">
               <img
                 src={footerLogo}
                 alt="RojgarShine"
@@ -54,7 +54,7 @@ export default function RecruiterFooter() {
               />
             </Link>
             <p className="mt-3 max-w-60 text-[0.875rem] leading-[1.75] text-white/50">
-              The smarter hiring platform - connecting top recruiters with verified talent, faster than ever.
+             Connecting talent with opportunity. Find your dream job with ease and confidence.
             </p>
             <div className="mt-5 flex gap-2">
               {socialLinks.map((link) => {
@@ -77,7 +77,7 @@ export default function RecruiterFooter() {
 
           <div className="pt-7">
             <h6 className="mb-4 text-[0.78rem] font-bold uppercase tracking-[1.5px] text-[#18a99c]">
-              Recruiter Tools
+              Quick Links
             </h6>
             <ul className="space-y-3 text-[0.875rem] text-white/50">
               {recruiterTools.map((item) => (
