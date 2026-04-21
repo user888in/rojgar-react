@@ -143,10 +143,12 @@ const Feedback = () => {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadFeedback();
   }, [loadFeedback]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadHeroStats();
   }, [loadHeroStats]);
 

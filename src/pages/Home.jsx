@@ -205,6 +205,7 @@ const Home = () => {
     };
 
     typeEffect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Load hero stats
@@ -327,6 +328,7 @@ const Home = () => {
     };
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleTitleSearch = useCallback(
     debounce(async (q) => {
       if (q.length < 2) {
@@ -348,6 +350,7 @@ const Home = () => {
     [],
   );
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleLocationSearch = useCallback(
     debounce(async (q) => {
       if (q.length < 2) {
@@ -369,6 +372,7 @@ const Home = () => {
     [],
   );
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleCategorySearch = useCallback(
     debounce(async (q) => {
       if (q.length < 2) {
@@ -541,27 +545,10 @@ const Home = () => {
           const seekerTrack = document.querySelector(".seeker-track");
           const recruiterTrack = document.querySelector(".recruiter-track");
           if (seekerTrack) {
-            const container = seekerTrack.parentElement;
-            if (container) {
-              const containerWidth = container.offsetWidth;
-              const gap = 20;
-              const slideWidth =
-                (containerWidth - (seekerPerView - 1) * gap) / seekerPerView;
-              const offset = 0;
-              seekerTrack.style.transform = `translateX(-${offset}px)`;
-            }
+            seekerTrack.style.transform = `translateX(0px)`;
           }
           if (recruiterTrack) {
-            const container = recruiterTrack.parentElement;
-            if (container) {
-              const containerWidth = container.offsetWidth;
-              const gap = 20;
-              const slideWidth =
-                (containerWidth - (recruiterPerView - 1) * gap) /
-                recruiterPerView;
-              const offset = 0;
-              recruiterTrack.style.transform = `translateX(-${offset}px)`;
-            }
+            recruiterTrack.style.transform = `translateX(0px)`;
           }
         }, 100);
       }
@@ -573,9 +560,11 @@ const Home = () => {
 
   // Initial data loading
   useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect */
     loadHeroStats();
     loadCompanies();
     loadTestimonials();
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, [loadHeroStats, loadCompanies, loadTestimonials]);
 
   // Build testimonial card

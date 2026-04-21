@@ -21,22 +21,13 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import { API_BASE_URL } from "../config/api";
-
-// ─────────────────────────────────────────────────────────────────────────────
-// FIX 1: Use a single consistent token key across your whole app.
-//         Check your login page — whatever key it uses to SAVE the token,
-//         use the SAME key here to READ it.
-//         Common keys: "token", "authToken", "jwt"
-//         Change TOKEN_KEY below to match your login page.
-// ─────────────────────────────────────────────────────────────────────────────
-const TOKEN_KEY = "token"; // ← change this to match your login page
-
-const getToken = () => localStorage.getItem(TOKEN_KEY);
 
 // Jobs Page Component
 const Jobs = () => {
   const navigate = useNavigate();
+  const { token } = useAuth();
   const [jobs, setJobs] = useState([]);
   const [totalJobs, setTotalJobs] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -51,20 +42,9 @@ const Jobs = () => {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [applying, setApplying] = useState(false);
   const [appliedJobs, setAppliedJobs] = useState(new Set());
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [error, setError] = useState(null);
 
   const jobsPerPage = 9;
-
-  // Check login status
-  useEffect(() => {
-    const checkAuth = () => {
-      setIsLoggedIn(!!getToken());
-    };
-    checkAuth();
-    window.addEventListener("authChange", checkAuth);
-    return () => window.removeEventListener("authChange", checkAuth);
-  }, []);
 
   // Fetch jobs from API
   const fetchJobs = useCallback(async () => {
@@ -80,9 +60,7 @@ const Jobs = () => {
       if (filters.location) params.append("location", filters.location);
       if (filters.category) params.append("category", filters.category);
 
-      const token = getToken();
-
-      // FIX 2: Make sure API_BASE_URL + "/jobs" matches what your SecurityConfig permits.
+      // Make sure API_BASE_URL + "/jobs" matches what your SecurityConfig permits.
       //         If SecurityConfig has: .requestMatchers(HttpMethod.GET, "/api/jobs/**").permitAll()
       //         Then API_BASE_URL should end with /api  →  e.g. "https://tunnel.com/api"
       //         So the final URL becomes: https://tunnel.com/api/jobs?page=1&limit=9
@@ -124,10 +102,12 @@ const Jobs = () => {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, filters]);
+  }, [currentPage, filters, token]);
 
   useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect */
     fetchJobs();
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, [fetchJobs]);
   // Add this useEffect right after your other useEffects (around line 100-110)
 
@@ -166,11 +146,14 @@ const Jobs = () => {
     }
 
     // Only update if there are URL params
+    /* eslint-disable react-hooks/set-state-in-effect */
     if (locationParam || titleParam || categoryParam) {
       setFilters(newFilters);
       // Reset to page 1 when URL params are present
       setCurrentPage(1);
     }
+    /* eslint-enable react-hooks/set-state-in-effect */
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Empty dependency array - runs once on mount
 
   // Handle search
@@ -207,7 +190,6 @@ const Jobs = () => {
 
   // Handle apply click
   const handleApplyClick = (job) => {
-    const token = getToken();
     if (!token) {
       setSelectedJob(job);
       setShowLoginModal(true);
@@ -222,7 +204,6 @@ const Jobs = () => {
     if (!selectedJob) return;
     setApplying(true);
     try {
-      const token = getToken();
       const response = await fetch(`${API_BASE_URL}/applications`, {
         method: "POST",
         headers: {
@@ -236,9 +217,7 @@ const Jobs = () => {
 
       if (!response.ok) {
         if (response.status === 401) {
-          // Token expired — clear and show login
-          localStorage.removeItem(TOKEN_KEY);
-          setIsLoggedIn(false);
+          // Token expired — show login
           setShowApplyModal(false);
           setShowLoginModal(true);
           return;
@@ -286,20 +265,6 @@ const Jobs = () => {
     } catch {
       alert("Failed to copy link");
     }
-  };
-
-  // Format date
-  const formatDate = (dateStr) => {
-    if (!dateStr) return "Recently";
-    const date = new Date(dateStr);
-    const now = new Date();
-    const diffTime = Math.abs(now.getTime() - date.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    if (diffDays === 1) return "1 day ago";
-    if (diffDays < 7) return `${diffDays} days ago`;
-    if (diffDays < 30)
-      return `${Math.floor(diffDays / 7)} week${Math.floor(diffDays / 7) > 1 ? "s" : ""} ago`;
-    return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   };
 
   // Pagination

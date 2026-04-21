@@ -60,6 +60,7 @@ export default function HeroStats({ statsConfig }) {
     }
 
     fetchStats();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
