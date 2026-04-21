@@ -14,10 +14,12 @@ import {
   Mail,
 } from "lucide-react";
 import { useState, useRef } from "react";
+import { Link } from "react-router-dom";
 import { API_BASE_URL } from "../config/api";
 import services_hero from "../assets/images/hero-services.jpg";
 import EyebrowBadge from "../components/ui/EyebrowBadge";
 import SectionTag from "../components/ui/SectionTag";
+
 const Services = () => {
   const [formData, setFormData] = useState({
     firstName: "",
@@ -231,7 +233,7 @@ const Services = () => {
         <div className="absolute -bottom-20 -left-20 w-[360px] h-[360px] rounded-full bg-[radial-gradient(circle,rgba(24,169,156,0.1)_0%,transparent_70%)] pointer-events-none"></div>
         <div className="container mx-auto px-4 max-w-[1160px]">
           <div className="text-center mb-14">
-             <SectionTag text={"Simple Process"} />
+            <SectionTag text={"Simple Process"} />
             <h2 className="text-[clamp(1.9rem,4vw,2.7rem)] font-extrabold text-white leading-[1.1]">
               How it <span className="text-[#18a99c]">works</span>
             </h2>
@@ -355,9 +357,9 @@ const Services = () => {
                   />
                   <span className="text-[0.82rem] text-white/50">
                     I agree to the{" "}
-                    <a href="#" className="text-[#18a99c] no-underline">
+                    <Link to="/terms" className="text-[#18a99c] no-underline hover:underline">
                       Terms and Conditions
-                    </a>{" "}
+                    </Link>{" "}
                     and Privacy Policy.
                   </span>
                 </div>
@@ -383,9 +385,12 @@ const Services = () => {
             {/* Image Side */}
             <div className="relative min-h-[300px] lg:min-h-full">
               <img
-                src="/src/assets/images/service-contactUs.jpg"
+                src="/assets/images/service-contactUs.jpg"
                 alt="Contact RojgarShine"
                 className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.target.src = services_hero;
+                }}
               />
               <div className="absolute inset-0 bg-gradient-to-br from-[rgba(9,29,51,0.2)] to-transparent"></div>
             </div>
@@ -396,10 +401,7 @@ const Services = () => {
       {/* CTA Section */}
       <section className="py-24 px-6 bg-white text-center">
         <div className="max-w-[680px] mx-auto">
-          <div className="inline-flex items-center gap-1.5 text-[0.7rem] font-bold uppercase text-[#18a99c] mb-4 justify-center">
-            <span className="w-7 h-0.5 bg-[#18a99c] rounded-full"></span>
-            Get Started Today
-          </div>
+          <SectionTag text={"Get started today"} />
           <h2 className="text-[clamp(2rem,4vw,2.8rem)] font-extrabold text-[#091d33] mb-4">
             Ready to find your{" "}
             <span className="text-[#18a99c]">next opportunity?</span>
@@ -409,18 +411,18 @@ const Services = () => {
             RojgarShine to make great matches.
           </p>
           <div className="flex gap-3.5 justify-center flex-wrap">
-            <a
-              href="#"
+            <Link
+              to="/register"
               className="inline-flex items-center gap-2 bg-[#091d33] text-white border-2 border-[#091d33] rounded-full py-3.5 px-8 text-[0.88rem] font-bold transition-all hover:bg-[#18a99c] hover:border-[#18a99c]"
             >
               <UserCheck size={18} /> Create Free Account
-            </a>
-            <a
-              href="#"
+            </Link>
+            <Link
+              to="/recruiter/post-job"
               className="inline-flex items-center gap-2 bg-transparent text-[#091d33] border-2 border-[rgba(9,29,51,0.2)] rounded-full py-3.5 px-8 text-[0.88rem] font-bold transition-all hover:border-[#091d33] hover:bg-[#f1f5f9]"
             >
               <Building size={18} /> Post a Job
-            </a>
+            </Link>
           </div>
         </div>
       </section>
@@ -429,10 +431,7 @@ const Services = () => {
       <section className="py-24 bg-[#f1f5f9]">
         <div className="container mx-auto px-4 max-w-[1160px]">
           <div className="text-center mb-13">
-            <div className="inline-flex items-center gap-1.5 text-[0.7rem] font-bold uppercase text-[#18a99c] mb-4 justify-center">
-              <span className="w-7 h-0.5 bg-[#18a99c] rounded-full"></span>
-              Find Us
-            </div>
+            <SectionTag text={"Find Us"} />
             <h2 className="text-[clamp(1.9rem,4vw,2.7rem)] font-extrabold text-[#091d33] leading-[1.1]">
               Our <span className="text-[#18a99c]">Head Office</span>
             </h2>
@@ -441,11 +440,10 @@ const Services = () => {
               anytime online.
             </p>
           </div>
-
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-7">
             {/* Map */}
             <iframe
-              className="w-full min-h-[380px] rounded-2xl border-0 shadow-md"
+              className="w-full h-full min-h-[380px] rounded-2xl border-0 shadow-md"
               src="https://www.google.com/maps?q=Chinhat,Lucknow,Uttar+Pradesh&output=embed"
               allowFullScreen
               loading="lazy"
@@ -453,11 +451,11 @@ const Services = () => {
             ></iframe>
 
             {/* Office Card */}
-            <div className="bg-[#091d33] rounded-2xl p-10 lg:p-9 flex flex-col justify-between relative overflow-hidden">
+            <div className="bg-[#091d33] rounded-2xl p-10 lg:p-9 flex flex-col justify-between relative overflow-hidden h-full">
               <div className="absolute -top-10 -right-10 w-[200px] h-[200px] rounded-full bg-[radial-gradient(circle,rgba(24,169,156,0.14)_0%,transparent_70%)] pointer-events-none"></div>
               <div>
                 <div className="inline-flex items-center gap-1.5 text-[0.68rem] font-bold tracking-[2px] uppercase text-[#18a99c] mb-4">
-                  <MapPin size={14} /> Location
+                  <MapPin size={16} /> Location
                 </div>
                 <div className="text-[1.5rem] font-extrabold text-white mb-7">
                   RojgarShine
@@ -467,7 +465,7 @@ const Services = () => {
                 <ul className="list-none mb-8">
                   <li className="flex items-start gap-3 py-3 border-b border-white/7">
                     <div className="w-8.5 h-8.5 bg-[rgba(24,169,156,0.15)] rounded-lg flex items-center justify-center text-[#18a99c] text-sm flex-shrink-0">
-                      <MapPin size={14} />
+                      <MapPin size={16} />
                     </div>
                     <div>
                       <strong className="block text-[0.72rem] font-bold tracking-[1px] uppercase text-white/40 mb-0.5">
@@ -480,7 +478,7 @@ const Services = () => {
                   </li>
                   <li className="flex items-start gap-3 py-3 border-b border-white/7">
                     <div className="w-8.5 h-8.5 bg-[rgba(24,169,156,0.15)] rounded-lg flex items-center justify-center text-[#18a99c] text-sm flex-shrink-0">
-                      <Mail size={14} />
+                      <Mail size={16} />
                     </div>
                     <div>
                       <strong className="block text-[0.72rem] font-bold tracking-[1px] uppercase text-white/40 mb-0.5">
