@@ -1,0 +1,1300 @@
+/* =============================================================================
+   RojgarShine — Unified Auth CSS  (FIXED — responsive & security questions)
+   ============================================================================= */
+
+/* ── RESET ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── DESIGN TOKENS ── */
+:root {
+  --navy:   #091d33;
+  --navy2:  #0d2a47;
+  --teal:   #18a99c;
+  --teal2:  #0d8a7e;
+  --amber:  #f59e0b;
+  --amber2: #d97706;
+  --slate:  #64748b;
+  --light:  #f1f5f9;
+  --white:  #ffffff;
+  --border: rgba(9, 29, 51, 0.12);
+  --danger: #dc2626;
+}
+
+/* ── BASE ── */
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--light);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* =============================================================================
+   LAYOUT WRAPPERS
+   ============================================================================= */
+
+.ll-logo img,
+.rl-logo img {
+  height: 100px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+}
+
+.login-wrapper {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 100vh;
+}
+
+.reg-wrapper {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  min-height: 100vh;
+}
+
+.register-wrapper {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  min-height: 100vh;
+}
+
+/* =============================================================================
+   LEFT PANEL — shared dark base
+   ============================================================================= */
+
+.login-left,
+.reg-left {
+  background: var(--navy);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: 60px 64px;
+  position: relative;
+  overflow: hidden;
+}
+
+.reg-wrapper .reg-left       { padding: 60px 52px; }
+.register-wrapper .reg-left  { padding: 60px 56px; align-items: flex-start; }
+.login-wrapper .login-left   { padding: 60px 56px; }
+
+/* Sticky left panel behavior for both register layouts */
+.reg-wrapper .reg-left,
+.register-wrapper .reg-left {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.reg-wrapper .reg-left-inner,
+.register-wrapper .reg-left-inner {
+  position: relative;
+  top: auto;
+  max-height: none;
+  overflow: visible;
+  padding-right: 0;
+}
+
+/* ── Decorative rings ── */
+.login-left.teal-rings::before {
+  content: '';
+  position: absolute;
+  width: 420px; height: 420px;
+  border-radius: 50%;
+  border: 1px solid rgba(24, 169, 156, 0.15);
+  top: -100px; right: -100px;
+}
+.login-left.teal-rings::after {
+  content: '';
+  position: absolute;
+  width: 260px; height: 260px;
+  border-radius: 50%;
+  background: rgba(24, 169, 156, 0.06);
+  bottom: -60px; left: -60px;
+}
+
+.login-left.amber-rings::before {
+  content: '';
+  position: absolute;
+  width: 400px; height: 400px;
+  border-radius: 50%;
+  border: 1px solid rgba(245, 158, 11, 0.12);
+  top: -100px; right: -110px;
+}
+.login-left.amber-rings::after {
+  content: '';
+  position: absolute;
+  width: 240px; height: 240px;
+  border-radius: 50%;
+  background: rgba(245, 158, 11, 0.05);
+  bottom: -60px; left: -60px;
+}
+
+.reg-wrapper .reg-left::before {
+  content: '';
+  position: absolute;
+  width: 380px; height: 380px;
+  border-radius: 50%;
+  border: 1px solid rgba(245, 158, 11, 0.1);
+  top: -90px; right: -110px;
+}
+.reg-wrapper .reg-left::after {
+  content: '';
+  position: absolute;
+  width: 220px; height: 220px;
+  border-radius: 50%;
+  background: rgba(245, 158, 11, 0.05);
+  bottom: -50px; left: -60px;
+}
+
+.register-wrapper .reg-left::before {
+  content: '';
+  position: absolute;
+  width: 380px; height: 380px;
+  border-radius: 50%;
+  border: 1px solid rgba(24, 169, 156, 0.12);
+  top: -80px; right: -120px;
+}
+.register-wrapper .reg-left::after {
+  content: '';
+  position: absolute;
+  width: 220px; height: 220px;
+  border-radius: 50%;
+  background: rgba(24, 169, 156, 0.06);
+  bottom: -40px; left: -60px;
+}
+
+.ring3 {
+  position: absolute;
+  width: 180px; height: 180px;
+  border-radius: 50%;
+  border: 1px solid rgba(24, 169, 156, 0.08);
+  top: 50%; left: -60px;
+  transform: translateY(-50%);
+  z-index: 0;
+}
+
+.login-left-inner,
+.reg-left-inner {
+  position: relative;
+  z-index: 2;
+}
+.register-wrapper .reg-left-inner { width: 100%; }
+
+/* =============================================================================
+   LEFT PANEL — LOGO
+   ============================================================================= */
+
+.ll-logo,
+.rl-logo {
+  font-size: 26px;
+  color: var(--white);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: -0.5px;
+  margin-bottom: 30px;
+}
+
+.ll-logo span,
+.rl-logo span { color: var(--teal); }
+
+.ll-logo-dot,
+.rl-logo-dot {
+  width: 8px; height: 8px;
+  background: var(--teal);
+  border-radius: 50%;
+  display: inline-block;
+}
+
+/* =============================================================================
+   LEFT PANEL — BADGES
+   ============================================================================= */
+
+.recruiter-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  border-radius: 99px;
+  padding: 5px 14px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--amber);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
+/* =============================================================================
+   LEFT PANEL — HEADLINES & SUBTEXT
+   ============================================================================= */
+
+.ll-headline,
+.rl-headline {
+  font-size: clamp(28px, 3vw, 44px);
+  color: var(--white);
+  line-height: 1.15;
+  letter-spacing: -1px;
+  margin-bottom: 18px;
+}
+
+.ll-headline { font-size: clamp(32px, 3.5vw, 48px); margin-bottom: 20px; }
+.rl-headline { font-size: clamp(26px, 2.6vw, 38px); letter-spacing: -0.8px; line-height: 1.2; }
+.register-wrapper .rl-headline { font-size: clamp(28px, 2.8vw, 40px); }
+
+.ll-headline em,
+.rl-headline em { font-style: normal; color: var(--teal); }
+
+.ll-headline.amber em,
+.rl-headline.amber em { color: var(--amber); }
+
+.ll-sub,
+.rl-sub {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.45);
+  line-height: 1.75;
+  max-width: 300px;
+  margin-bottom: 40px;
+}
+
+.ll-sub { font-size: 15px; color: rgba(255, 255, 255, 0.5); max-width: 340px; margin-bottom: 48px; }
+
+/* =============================================================================
+   LEFT PANEL — STATS / METRICS
+   ============================================================================= */
+
+.ll-stats, .ll-metrics { display: flex; gap: 28px; }
+.ll-stats { gap: 32px; }
+
+.ll-stat-num, .ll-metric-num {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--white);
+}
+.ll-stat-num { font-size: 26px; }
+
+.ll-stat-label, .ll-metric-label {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.38);
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+}
+.ll-stat-label { font-size: 12px; color: rgba(255, 255, 255, 0.4); }
+
+.ll-stat-divider, .ll-metric-divider {
+  width: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  align-self: stretch;
+}
+.ll-stat-divider { background: rgba(255, 255, 255, 0.1); }
+
+/* =============================================================================
+   LEFT PANEL — FEATURE LIST
+   ============================================================================= */
+
+.ll-features { display: flex; flex-direction: column; gap: 14px; }
+
+.ll-feature {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.ll-feature-icon {
+  width: 30px; height: 30px;
+  border-radius: 8px;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  color: var(--amber);
+  flex-shrink: 0;
+}
+
+/* =============================================================================
+   LEFT PANEL — STEPS
+   ============================================================================= */
+
+.rl-steps { display: flex; flex-direction: column; gap: 18px; }
+.register-wrapper .rl-steps { gap: 20px; }
+
+.rl-step { display: flex; align-items: flex-start; gap: 13px; }
+.register-wrapper .rl-step { gap: 14px; }
+
+.rl-step-num {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.28);
+  color: var(--amber);
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.register-wrapper .rl-step-num {
+  width: 32px; height: 32px;
+  background: rgba(24, 169, 156, 0.15);
+  border: 1px solid rgba(24, 169, 156, 0.3);
+  color: var(--teal);
+  font-size: 13px;
+  margin-top: 1px;
+}
+
+.rl-step-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.82);
+  margin-bottom: 2px;
+}
+.register-wrapper .rl-step-title { color: var(--white); }
+
+.rl-step-desc {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.35);
+  line-height: 1.5;
+}
+.register-wrapper .rl-step-desc { color: rgba(255, 255, 255, 0.38); }
+
+/* =============================================================================
+   LEFT PANEL — FLOATING ELEMENTS
+   ============================================================================= */
+
+.ll-card {
+  position: absolute;
+  bottom: 60px; right: -20px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 16px 20px;
+  backdrop-filter: blur(12px);
+  width: 230px;
+  z-index: 2;
+  animation: floatCard 4s ease-in-out infinite;
+}
+
+.ll-float-card {
+  position: absolute;
+  bottom: 52px; right: -16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 14px 18px;
+  backdrop-filter: blur(8px);
+  width: 210px;
+  z-index: 2;
+  animation: floatCard 4s ease-in-out infinite;
+}
+
+@keyframes floatCard {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-8px); }
+}
+
+.ll-card-tag, .ll-float-tag {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--teal);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.ll-float-tag { color: var(--amber); margin-bottom: 5px; }
+
+.ll-card-title, .ll-float-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--white);
+  margin-bottom: 4px;
+}
+.ll-float-title { margin-bottom: 3px; }
+
+.ll-card-sub, .ll-float-sub {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.45);
+}
+.ll-float-sub { color: rgba(255, 255, 255, 0.4); }
+
+.ll-card-dot, .ll-float-dot {
+  width: 6px; height: 6px;
+  background: #22c55e;
+  border-radius: 50%;
+  display: inline-block;
+}
+.ll-card-dot { margin-right: 5px; }
+.ll-float-dot { margin-right: 4px; }
+
+.rl-pill {
+  position: absolute;
+  bottom: 44px; right: -8px;
+  background: rgba(24, 169, 156, 0.12);
+  border: 1px solid rgba(24, 169, 156, 0.25);
+  border-radius: 99px;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 2;
+  animation: floatPill 3.5s ease-in-out infinite;
+}
+
+.reg-wrapper .rl-pill {
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  bottom: 44px;
+}
+
+@keyframes floatPill {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-6px); }
+}
+
+.rl-pill-dot {
+  width: 7px; height: 7px;
+  background: #22c55e;
+  border-radius: 50%;
+}
+
+.rl-pill-text {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.65);
+  white-space: nowrap;
+}
+
+/* =============================================================================
+   RIGHT PANEL — CONTAINER
+   ============================================================================= */
+
+.login-right,
+.reg-right {
+  background: var(--white);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 60px 64px;
+  position: relative;
+}
+
+/* FIX: register right panel — proper scroll + padding */
+.reg-right {
+  padding: 48px 40px;
+  overflow-y: auto;
+  align-items: center;         /* centre rr-inner horizontally */
+  justify-content: flex-start;
+}
+
+/* Inner wrappers */
+.rr-inner,
+.lr-inner {
+  max-width: 380px;
+  width: 100%;
+  margin: auto;
+  animation: fadeUp 0.5s ease both;
+}
+
+/* FIX: give register form more room for security question cards */
+.reg-wrapper .rr-inner,
+.register-wrapper .rr-inner {
+  max-width: 680px;           /* wider so sq-pair cards breathe */
+  width: 100%;
+  margin: 0 auto;
+  padding: 0;                 /* let reg-right padding handle outer space */
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* =============================================================================
+   RIGHT PANEL — EYEBROW / TITLE / SUB
+   ============================================================================= */
+
+.lr-eyebrow,
+.rr-eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--teal);
+  margin-bottom: 10px;
+}
+
+.lr-eyebrow.amber,
+.rr-eyebrow.amber { color: var(--amber); }
+
+.lr-title,
+.rr-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--navy);
+  letter-spacing: -0.5px;
+  margin-bottom: 6px;
+}
+.lr-title { font-size: 30px; }
+
+.lr-sub,
+.rr-sub {
+  font-size: 14px;
+  color: var(--slate);
+  margin-bottom: 32px;
+}
+.lr-sub { margin-bottom: 36px; }
+
+/* =============================================================================
+   RIGHT PANEL — ROLE SWITCHER
+   ============================================================================= */
+
+.role-switcher {
+  display: flex;
+  background: var(--light);
+  border-radius: 10px;
+  padding: 4px;
+  margin-bottom: 32px;
+  gap: 4px;
+}
+
+.role-tab {
+  flex: 1;
+  padding: 8px;
+  border: none;
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: transparent;
+  color: var(--slate);
+  text-decoration: none;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.role-tab.active {
+  background: var(--white);
+  color: var(--navy);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.role-tab:hover:not(.active) { color: var(--navy); }
+
+/* =============================================================================
+   RIGHT PANEL — ADMIN BADGE
+   ============================================================================= */
+
+.admin-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(24, 169, 156, 0.1);
+  border: 1px solid rgba(24, 169, 156, 0.25);
+  border-radius: 20px;
+  padding: 5px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--teal);
+  margin-bottom: 28px;
+}
+.admin-badge i { font-size: 13px; }
+
+/* =============================================================================
+   RIGHT PANEL — ALERTS
+   ============================================================================= */
+
+#errorLoginMessage:not(:empty),
+#tokenMessage:not(:empty),
+#message:not(:empty) {
+  font-size: 13px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+#errorLoginMessage:not(:empty),
+#tokenMessage:not(:empty) {
+  background: #fff5f5;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+}
+
+#message:not(:empty) {
+  background: #fff5f5;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+}
+
+#message.success {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #166534;
+}
+
+#message.error {
+  background: #fff5f5;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+}
+
+/* =============================================================================
+   FORM FIELDS — SHARED
+   ============================================================================= */
+
+.field-group {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-grid .field-group { margin-bottom: 0; }
+
+.field-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--navy);
+  letter-spacing: 0.3px;
+  margin-bottom: 7px;
+  display: block;
+}
+
+.field-wrap { position: relative; }
+
+.field-icon,
+.field-wrap i.field-icon {
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: #94a3b8;
+  pointer-events: none;
+}
+
+.login-wrapper.admin .field-wrap i.field-icon { font-size: 15px; left: 14px; }
+
+.field-wrap .field-icon.top {
+  top: 14px;
+  transform: none;
+}
+
+.field-input {
+  width: 100%;
+  height: 46px;
+  border: 1.5px solid var(--border);
+  border-radius: 11px;
+  padding: 0 44px 0 40px;
+  font-size: 14px;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--navy);
+  background: var(--light);
+  outline: none;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+}
+
+.login-wrapper .field-input { height: 48px; border-radius: 12px; }
+
+.field-input:focus {
+  border-color: var(--teal);
+  background: var(--white);
+  box-shadow: 0 0 0 3px rgba(24, 169, 156, 0.10);
+}
+
+.recruiter-page .field-input:focus {
+  border-color: var(--amber);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.10);
+}
+
+.field-input::placeholder { color: #b0bac6; }
+
+.field-input.is-error,
+.field-input.error {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.08);
+}
+
+textarea.field-input {
+  height: 90px;
+  padding-top: 12px;
+  resize: none;
+}
+
+.eye-toggle,
+.eye-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #94a3b8;
+  font-size: 15px;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s;
+}
+
+.eye-toggle { right: 14px; font-size: 16px; }
+
+.eye-toggle:hover,
+.eye-btn:hover { color: var(--navy); }
+
+.field-error {
+  font-size: 11px;
+  color: var(--danger);
+  margin-top: 4px;
+  min-height: 16px;
+  display: block;
+}
+
+/* =============================================================================
+   FORM GRID
+   ============================================================================= */
+
+/* FIX: main grid — 2 columns on medium+, 1 on small */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.register-wrapper .form-grid { gap: 16px; }
+
+.form-grid .full { grid-column: 1 / -1; }
+
+/* =============================================================================
+   FORM SECTIONS
+   ============================================================================= */
+
+.form-section-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #94a3b8;
+  margin: 20px 0 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.form-section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* =============================================================================
+   SECURITY QUESTION SELECT (inline styles in HTML moved here)
+   ============================================================================= */
+
+.field-select {
+  width: 100%;
+  height: 46px;
+  border: 1.5px solid var(--border);
+  border-radius: 11px;
+  padding: 0 36px 0 40px;         /* room for icon left, chevron right */
+  font-size: 14px;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--navy);
+  background: var(--light);
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 16 16'%3E%3Cpath fill='%2394a3b8' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+
+  /* FIX: ensure text doesn't overflow / get clipped */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.field-select:focus {
+  border-color: var(--teal);
+  background-color: var(--white);
+  box-shadow: 0 0 0 3px rgba(24, 169, 156, 0.10);
+}
+
+.field-select.is-error {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.08);
+}
+
+.field-select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.field-select.loading {
+  color: transparent;
+  background-color: #e2e8f0;
+  animation: shimmer 1.4s ease infinite;
+  background-image: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+  background-size: 200% 100%;
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* =============================================================================
+   SECURITY QUESTION PAIRS  ← KEY FIX SECTION
+   ============================================================================= */
+
+/* Section header divider */
+.security-section {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+  margin-bottom: 4px;
+}
+
+.security-section-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+
+.security-section-line {
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/*
+ * sq-pair card: full width, stacked vertically inside the main 2-col grid.
+ * The two fields (question + answer) sit side-by-side on medium screens,
+ * and stack to 1 column on narrow screens.
+ */
+.sq-pair {
+  grid-column: 1 / -1;            /* always spans full row of outer grid */
+  background: #f8fafc;
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  padding: 24px 20px 18px;        /* extra top for the badge */
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* question | answer */
+  gap: 16px;
+  position: relative;
+  margin-top: 8px;
+}
+
+.sq-pair-num {
+  position: absolute;
+  top: -12px;
+  left: 16px;
+  background: var(--teal);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 3px 14px;
+  border-radius: 99px;
+  white-space: nowrap;
+}
+
+/* Recruiter variant amber badge */
+.recruiter-page .sq-pair-num {
+  background: var(--amber);
+}
+
+/* =============================================================================
+   REMEMBER + FORGOT ROW
+   ============================================================================= */
+
+.field-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 28px;
+}
+
+.remember-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  color: var(--slate);
+  cursor: pointer;
+}
+
+.remember-label input[type="checkbox"] {
+  width: 16px; height: 16px;
+  accent-color: var(--teal);
+  cursor: pointer;
+}
+
+.remember-label.amber input[type="checkbox"] { accent-color: var(--amber); }
+
+.forgot-link {
+  font-size: 13px;
+  color: var(--teal);
+  text-decoration: none;
+  font-weight: 500;
+}
+.forgot-link.amber { color: var(--amber); }
+.forgot-link:hover { text-decoration: underline; }
+
+/* =============================================================================
+   TERMS ROW
+   ============================================================================= */
+
+.terms-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin: 20px 0 22px;
+}
+
+.terms-row input[type="checkbox"] {
+  width: 16px; height: 16px;
+  accent-color: var(--teal);
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.terms-row.amber input[type="checkbox"] { accent-color: var(--amber); }
+
+.terms-row label {
+  font-size: 13px;
+  color: var(--slate);
+  cursor: pointer;
+  line-height: 1.5;
+}
+
+.terms-row a {
+  color: var(--teal);
+  font-weight: 500;
+  text-decoration: none;
+}
+.terms-row.amber a { color: var(--amber); }
+.terms-row a:hover { text-decoration: underline; }
+
+/* =============================================================================
+   PASSWORD STRENGTH METER
+   ============================================================================= */
+
+.pwd-strength {
+  margin-top: 6px;
+  display: none;
+}
+
+.pwd-strength-bar {
+  height: 3px;
+  border-radius: 99px;
+  background: #e5e7eb;
+  overflow: hidden;
+  margin-bottom: 3px;
+}
+
+.pwd-strength-fill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.3s, background 0.3s;
+  width: 0%;
+}
+
+.pwd-strength-label {
+  font-size: 11px;
+  color: var(--slate);
+}
+
+/* =============================================================================
+   SUBMIT BUTTONS
+   ============================================================================= */
+
+.btn-login,
+.btn-register {
+  width: 100%;
+  height: 50px;
+  background: var(--navy);
+  color: var(--white);
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  letter-spacing: 0.3px;
+  margin-bottom: 20px;
+}
+
+.btn-login:hover,
+.btn-register:hover {
+  background: var(--teal);
+  transform: translateY(-1px);
+}
+
+.recruiter-page .btn-login:hover,
+.recruiter-page .btn-register:hover { background: var(--amber2); }
+
+.btn-login:active,
+.btn-register:active { transform: translateY(0); }
+
+.btn-login:disabled,
+.btn-register:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* =============================================================================
+   DIVIDERS / HELPER ROWS
+   ============================================================================= */
+
+.or-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.or-line { flex: 1; height: 1px; background: var(--border); }
+
+.or-text {
+  font-size: 12px;
+  color: #b0bac6;
+  white-space: nowrap;
+}
+
+.register-row,
+.login-row {
+  text-align: center;
+  font-size: 14px;
+  color: var(--slate);
+}
+
+.register-row a,
+.login-row a {
+  color: var(--navy);
+  font-weight: 600;
+  text-decoration: none;
+  border-bottom: 2px solid var(--teal);
+  padding-bottom: 1px;
+  transition: color 0.2s;
+}
+
+.register-row a:hover,
+.login-row a:hover { color: var(--teal); }
+
+.recruiter-page .register-row a,
+.recruiter-page .login-row a { border-bottom-color: var(--amber); }
+.recruiter-page .register-row a:hover,
+.recruiter-page .login-row a:hover { color: var(--amber2); }
+
+.back-row,
+.recruiter-row,
+.seeker-row { text-align: center; margin-top: 14px; }
+
+.back-row a,
+.recruiter-row a,
+.seeker-row a {
+  font-size: 13px;
+  color: var(--slate);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: color 0.2s;
+}
+
+.back-row a:hover,
+.recruiter-row a:hover,
+.seeker-row a:hover { color: var(--teal); }
+
+/* =============================================================================
+   RESPONSIVE — TABLET  (769–1100px)
+   ============================================================================= */
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .login-left,
+  .reg-left { padding: 40px 36px; }
+
+  .login-right,
+  .reg-right { padding: 40px 28px; }
+
+  .ll-card,
+  .ll-float-card,
+  .rl-pill { display: none; }
+
+  .reg-wrapper .reg-left-inner,
+  .register-wrapper .reg-left-inner {
+    max-height: none;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1100px) {
+  .reg-wrapper {
+    grid-template-columns: 0.9fr 1.1fr;
+  }
+
+  .reg-left { padding: 40px 36px; }
+  .reg-right { padding: 40px 28px; }
+  .rl-pill { display: none; }
+
+  .reg-wrapper .rr-inner,
+  .register-wrapper .rr-inner {
+    max-width: 100%;
+  }
+
+  /* On tablets sq-pair goes single column to avoid cramping */
+  .sq-pair {
+    grid-template-columns: 1fr;
+  }
+
+  .reg-wrapper .reg-left,
+  .register-wrapper .reg-left {
+    overflow: hidden;
+  }
+}
+
+/* Short screens: compact left content to avoid clipping/scrollbars */
+@media (max-height: 860px) and (min-width: 769px) {
+  .reg-wrapper .reg-left,
+  .register-wrapper .reg-left {
+    padding: 36px 34px;
+  }
+
+  .reg-wrapper .ll-logo img,
+  .register-wrapper .ll-logo img {
+    height: 72px;
+  }
+
+  .reg-wrapper .rl-headline,
+  .register-wrapper .rl-headline {
+    font-size: clamp(24px, 2.2vw, 32px);
+    margin-bottom: 12px;
+  }
+
+  .reg-wrapper .rl-sub,
+  .register-wrapper .rl-sub {
+    font-size: 13px;
+    line-height: 1.55;
+    margin-bottom: 22px;
+  }
+
+  .reg-wrapper .rl-steps,
+  .register-wrapper .rl-steps {
+    gap: 12px;
+  }
+
+  .reg-wrapper .rl-step-title,
+  .register-wrapper .rl-step-title {
+    font-size: 12px;
+  }
+
+  .reg-wrapper .rl-step-desc,
+  .register-wrapper .rl-step-desc {
+    font-size: 11px;
+    line-height: 1.35;
+  }
+}
+
+/* Large tablets/small laptops: prioritize form readability */
+@media (min-width: 769px) and (max-width: 1280px) {
+  .reg-wrapper {
+    grid-template-columns: 0.85fr 1.15fr;
+  }
+
+  .reg-wrapper .rr-inner {
+    max-width: 760px;
+  }
+}
+
+/* =============================================================================
+   RESPONSIVE — MOBILE  (≤768px)
+   ============================================================================= */
+
+@media (max-width: 768px) {
+  .login-wrapper,
+  .reg-wrapper,
+  .register-wrapper {
+    grid-template-columns: 1fr;
+  }
+
+  /* Hide left panel on mobile */
+  .login-left,
+  .reg-left { display: none; }
+
+  .login-right,
+  .reg-right {
+    padding: 32px 20px;
+    min-height: 100vh;
+    justify-content: flex-start;
+    align-items: stretch;
+  }
+
+  .lr-inner,
+  .rr-inner {
+    max-width: 100%;
+    width: 100%;
+    margin: 0;
+  }
+
+  /* On mobile, main form grid goes 1-col */
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-grid .full { grid-column: 1; }
+
+  /* Security pair cards: stack vertically */
+  .sq-pair {
+    grid-template-columns: 1fr;
+    padding: 22px 14px 16px;
+    gap: 12px;
+  }
+}
+
+/* =============================================================================
+   RESPONSIVE — SMALL MOBILE  (≤480px)
+   ============================================================================= */
+
+@media (max-width: 480px) {
+  .form-grid { grid-template-columns: 1fr; }
+  .form-grid .full { grid-column: 1; }
+
+  .rr-title { font-size: 22px; }
+  .rr-sub   { font-size: 13px; margin-bottom: 20px; }
+
+  .sq-pair  { padding: 22px 12px 14px; }
+}
