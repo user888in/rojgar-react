@@ -83,6 +83,7 @@ const Jobs = () => {
       if (!response.ok) throw new Error(`Server error: ${response.status}`);
 
       const data = await response.json();
+      console.log(data)
 
       // FIX 5: Handle both response shapes — { jobs, total } or flat array
       if (Array.isArray(data)) {

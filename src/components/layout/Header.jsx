@@ -21,6 +21,7 @@ import {
   Briefcase,
   Users,
 } from 'lucide-react';
+import rojgar_shine_logo from "../../assets/images/Rojgarshine logo-01.png"
 
 function initials(name) {
   if (!name) return 'U';
@@ -125,11 +126,11 @@ const Header = () => {
 
   return (
     <>
-      <nav className="h-[62px] bg-white border-b border-[#e2e8f0] flex items-center px-5 relative shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+      <nav className="fixed top-0 left-0 right-0 z-50 h-[62px] bg-white border-b border-[#e2e8f0] flex items-center px-5 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
         {/* Logo */}
         <Link to={logoTo} className="flex items-center gap-2 no-underline mr-7 flex-shrink-0">
           <img
-            src="/assets/images/Rojgarshine logo-01.png"
+            src={rojgar_shine_logo}
             alt="RojgarShine"
             className="h-10"
           />

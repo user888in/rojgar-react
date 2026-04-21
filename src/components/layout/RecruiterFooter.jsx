@@ -37,7 +37,7 @@ const bottomLinks = [
   { label: 'Cookie Policy', href: '#' },
 ];
 
-export default function Footer() {
+export default function RecruiterFooter() {
   return (
     <footer className="relative overflow-hidden bg-[#091d33] pt-11 text-white">
       <div className="pointer-events-none absolute -right-25 -top-25 h-100 w-100 rounded-full bg-[radial-gradient(circle,rgba(24,169,156,0.12)_0%,transparent_70%)]" />
