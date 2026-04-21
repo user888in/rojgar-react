@@ -129,6 +129,49 @@ const Jobs = () => {
   useEffect(() => {
     fetchJobs();
   }, [fetchJobs]);
+  // Add this useEffect right after your other useEffects (around line 100-110)
+
+  // Read URL parameters on component mount
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const locationParam = urlParams.get("location");
+    const titleParam = urlParams.get("title");
+    const categoryParam = urlParams.get("category");
+
+    const newFilters = { ...filters };
+
+    if (locationParam) {
+      newFilters.location = locationParam;
+      // Also set the input field value
+      setTimeout(() => {
+        const locationInput = document.getElementById("searchLocation");
+        if (locationInput) locationInput.value = locationParam;
+      }, 100);
+    }
+
+    if (titleParam) {
+      newFilters.title = titleParam;
+      setTimeout(() => {
+        const titleInput = document.getElementById("searchTitle");
+        if (titleInput) titleInput.value = titleParam;
+      }, 100);
+    }
+
+    if (categoryParam) {
+      newFilters.category = categoryParam;
+      setTimeout(() => {
+        const categoryInput = document.getElementById("searchCategory");
+        if (categoryInput) categoryInput.value = categoryParam;
+      }, 100);
+    }
+
+    // Only update if there are URL params
+    if (locationParam || titleParam || categoryParam) {
+      setFilters(newFilters);
+      // Reset to page 1 when URL params are present
+      setCurrentPage(1);
+    }
+  }, []); // Empty dependency array - runs once on mount
 
   // Handle search
   const handleSearch = () => {
@@ -315,7 +358,7 @@ const Jobs = () => {
     const experience = job.experienceRequired || job.experience;
     const description = stripHtml(job.description || job.jobDescription, 120);
     const createdAt = job.createdAt || job.postedDate;
-    console.log(jobs)
+    console.log(jobs);
     const getInitials = () => {
       return companyName
         .split(" ")
