@@ -1,6 +1,5 @@
 import RecruiterBackToTop from '../../components/recruiter/RecruiterBackToTop';
 import RecruiterCTA from '../../components/recruiter/RecruiterCTA';
-import RecruiterFooter from '../../components/layout/RecruiterFooter';
 import RecruiterHero from '../../components/recruiter/RecruiterHero';
 import RecruiterHowItWorks from '../../components/recruiter/RecruiterHowItWorks';
 import RecruiterMetrics from '../../components/recruiter/RecruiterMetrics';
@@ -22,7 +21,6 @@ const Home = () => {
         <RecruiterTestimonials />
         <RecruiterCTA stats={stats} />
       </main>
-      <RecruiterFooter />
       <RecruiterBackToTop />
     </div>
   );
