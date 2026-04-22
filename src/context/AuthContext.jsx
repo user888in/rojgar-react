@@ -37,7 +37,6 @@ export const AuthProvider = ({ children }) => {
     window.dispatchEvent(new Event('authChange'));
   }, []);
 
-<<<<<<< HEAD
   const updateUser = useCallback((partialUser) => {
     setUser((prev) => {
       const nextUser = { ...(prev || {}), ...(partialUser || {}) };
@@ -47,9 +46,6 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const isAuthenticated = !!token && !!user;
-=======
-  const isAuthenticated = !!user;
->>>>>>> 7375cd4101b41ebc34f65e9dab1729d18bad6480
 
   const hasRole = useCallback((roles) => {
     if (!user || !user.role) return false;
