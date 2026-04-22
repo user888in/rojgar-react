@@ -38,7 +38,7 @@ export const AuthProvider = ({ children }) => {
     window.dispatchEvent(new Event('authChange'));
   }, []);
 
-  const isAuthenticated = !!token && !!user;
+  const isAuthenticated = !!user;
 
   const hasRole = useCallback((roles) => {
     if (!user || !user.role) return false;

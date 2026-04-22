@@ -57,9 +57,7 @@ function formatDate(dateStr) {
   }
 }
 
-/* ══════════════════════════════════════════════════════════════════════════════
-   JOB CARD
-══════════════════════════════════════════════════════════════════════════════ */
+// JOB CARD
 const JobCard = ({ job, appliedJobs, onApply, onViewDetails, onShare }) => {
   // FIX 1: backend uses jobId, not id
   const jobId       = job.jobId ?? job.id;
@@ -93,12 +91,12 @@ const JobCard = ({ job, appliedJobs, onApply, onViewDetails, onShare }) => {
 
       {/* Company Logo & Title */}
       <div className="flex items-start gap-3 mb-3" style={{ paddingRight: 34 }}>
-        <div className="min-w-[44px] w-12 h-11 rounded-xl bg-gray-100 border border-gray-200 flex items-center justify-center font-extrabold text-sm text-navy-900 flex-shrink-0 overflow-hidden">
+        <div className="min-w-[44px] w-18 h-12 rounded-xl bg-gray-100 border-gray-200 flex items-center justify-center font-extrabold text-sm text-navy-900 flex-shrink-0 overflow-hidden">
           {companyLogo ? (
             <img
               src={companyLogo}
               alt={companyName}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-fill"
               onError={(e) => {
                 e.target.style.display = "none";
                 e.target.parentElement.textContent = getInitials();
@@ -179,9 +177,7 @@ const JobCard = ({ job, appliedJobs, onApply, onViewDetails, onShare }) => {
   );
 };
 
-/* ══════════════════════════════════════════════════════════════════════════════
-   JOBS PAGE
-══════════════════════════════════════════════════════════════════════════════ */
+/* JOBS PAGE */
 const Jobs = () => {
   const navigate = useNavigate();
   const { token, userIsJobSeeker } = useAuth();   // expose userIsJobSeeker from your AuthContext if possible
@@ -361,12 +357,12 @@ const Jobs = () => {
     navigate(`/login?return=${returnUrl}`);
   };
 
-  const viewJobDetails = (jobId) => navigate(`/job-details/${jobId}`);
+  const viewJobDetails = (jobId) => navigate(`/jobs/${jobId}`);
 
   const shareJob = async (job, e) => {
     e.stopPropagation();
     const jobId   = job.jobId ?? job.id;
-    const shareUrl = `${window.location.origin}/job-details/${jobId}`;
+    const shareUrl = `${window.location.origin}/jobs/${jobId}`;
     if (navigator.share) {
       navigator.share({ title: `${job.title} at ${job.companyName}`, url: shareUrl }).catch(() => {});
       return;
@@ -656,7 +652,7 @@ const Jobs = () => {
           onClick={() => setShowLoginModal(false)}
         >
           <div
-            className="bg-white rounded-2xl max-w-md w-full mx-4 shadow-2xl"
+            className="bg-white rounded-2xl max-w-lg w-full mx-4 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="relative border-b border-gray-100 px-6 pt-5 pb-2">
@@ -665,10 +661,10 @@ const Jobs = () => {
                 className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 cursor-pointer bg-transparent border-none"
                 onClick={() => setShowLoginModal(false)}
               >
-                <X size={18} />
-              </button>
+                <X size={24} />
+              </button>   
             </div>
-            <div className="text-center py-6 px-6">
+            <div className="text-center py-4 px-6">
               <div className="w-16 h-16 rounded-full bg-amber-50 flex items-center justify-center mx-auto mb-4">
                 <Lock size={32} className="text-amber-600" />
               </div>
@@ -677,16 +673,16 @@ const Jobs = () => {
                 Create a free account or login to apply for jobs and track your applications.
               </p>
             </div>
-            <div className="border-t border-gray-100 px-6 py-4 flex justify-center gap-3">
+            <div className="border-t border-gray-100 px-6 py-7 flex justify-center gap-3">
               <button
-                className="px-5 py-2 rounded-lg text-sm font-semibold border border-gray-200 bg-transparent text-navy-900 hover:border-navy-900 hover:bg-gray-50 transition-all cursor-pointer"
+                className="px-5 py-2 rounded-lg text-sm font-semibold  hover:border-gray-200 bg-transparent text-navy-900 hover:border-navy-900 hover:bg-gray-50 transition-all cursor-pointer"
                 onClick={() => setShowLoginModal(false)}
               >
                 Cancel
               </button>
               <button
                 onClick={redirectToLogin}
-                className="px-5 py-2 rounded-lg text-sm font-semibold border-none bg-[#091D33] text-white hover:bg-teal-600 transition-all flex items-center gap-2 cursor-pointer"
+                className="px-5 py-2 hover:-translate-y-[2px] rounded-lg text-sm font-semibold border-none bg-[#091D33] text-white hover:bg-teal-600 transition-all flex items-center gap-2 cursor-pointer"
               >
                 <LogIn size={16} /> Login to Apply
               </button>

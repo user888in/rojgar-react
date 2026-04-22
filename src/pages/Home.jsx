@@ -607,7 +607,7 @@ const Home = () => {
 
     return (
       <div
-        className={`bg-white rounded-[16px] p-[26px] border-[1.5px] ${isFeatured ? "border-[#18a99c]" : "border-[#e2e8f0]"} transition-all duration-200 hover:-translate-y-1 hover:shadow-md cursor-pointer flex flex-col h-full`}
+        className={`bg-white rounded-[16px] p-[26px] border-[1.5px] ${isFeatured ? "border-[#18a99c]" : "border-[#e2e8f0]"} transition-all duration-200 hover:-translate-y-2 hover:shadow-xl cursor-pointer flex flex-col h-full`}
         onClick={() => openFeedbackDetail(feedback.feedbackId || feedback.id)}
       >
         {isFeatured && (
@@ -1201,7 +1201,7 @@ const Home = () => {
             ) : (
               <>
                 <div className="relative">
-                  <div className="overflow-hidden rounded-[18px]">
+                  <div className="overflow rounded-[18px]">
                     <div
                       ref={(el) => {
                         if (el && seekers.length > 0) {

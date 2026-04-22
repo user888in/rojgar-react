@@ -132,13 +132,13 @@ export default function PublicFooter() {
 
         <div className="flex flex-wrap items-center justify-between gap-3 py-4 text-[0.8rem] text-white/30">
           <span>
-            <a
-              href="../admin/login.html"
-              className="pointer-events-none text-white/30"
+            <Link
+              to="/admin/login"
+              className="text-white/30  transition"
               aria-label="Admin login"
             >
               © 2026
-            </a>{' '}
+            </Link>{' '}
             RojgarShine. All rights reserved. Designed for recruiters who move fast.
           </span>
           <div className="flex flex-wrap gap-5">
