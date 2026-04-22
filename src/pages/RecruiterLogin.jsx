@@ -79,8 +79,8 @@ const RecruiterLogin = () => {
         clearTimeout(timer);
         if (res.ok) {
           const user = await res.json();
-          if (user && user.role === "RECRUITER" && (user.token || user.id || user.userId)) {
-            login(user.token ?? "authenticated", user);
+          if (user && user.role === "RECRUITER" && (user.accessToken || user.token || user.id || user.userId)) {
+            login(user.accessToken ?? user.token ?? "", user);
             navigate("/recruiter/dashboard", { replace: true });
             return;
           }
@@ -177,7 +177,7 @@ const RecruiterLogin = () => {
         return;
       }
 
-      login(data.token ?? "", data);
+      login(data.accessToken ?? "", data);
 
       const returnUrl = sessionStorage.getItem("redirectAfterLogin");
       if (returnUrl) {

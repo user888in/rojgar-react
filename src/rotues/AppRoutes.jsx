@@ -2,6 +2,7 @@ import { lazy } from "react";
 import { Route, Routes, Navigate } from "react-router-dom";
 import PublicLayout from "../components/layout/PublicLayout";
 import RecruiterLayout from "../components/layout/RecruiterLayout";
+import RecruiterShellLayout from "../components/layout/RecruiterShellLayout";
 import AdminLayout from "../components/layout/AdminLayout";
 import ProtectedRoute from "../components/routing/ProtectedRoute";
 import GuestRoute from "../components/routing/GuestRoute";
@@ -89,7 +90,7 @@ const AppRoutes = () => {
 
       {/* Recruiter protected routes */}
       <Route element={<ProtectedRoute allowedRoles={["RECRUITER"]} redirectTo="/recruiter/login" />}>
-        <Route element={<RecruiterLayout />}>
+        <Route element={<RecruiterShellLayout />}>
           <Route path="/recruiter/dashboard" element={<RecruiterDashboard />} />
           <Route path="/recruiter/post-job" element={<RecruiterPostJob />} />
           <Route path="/recruiter/jobs" element={<RecruiterManageJobs />} />

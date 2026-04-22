@@ -1,6 +1,7 @@
 import { Briefcase, Eye, UsersRound } from 'lucide-react';
 import SectionTag from '../ui/SectionTag';
 import aboutImg from '../../assets/images/about-2.jpg';
+import { motion } from 'framer-motion';
 
 const BLOCKS = [
   {
@@ -26,7 +27,10 @@ const BLOCKS = [
 export default function VisionMission() {
   return (
     <section className="bg-white py-[64px] sm:py-[100px]">
-      <div className="max-w-[1180px] mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+      <motion.div initial={{ opacity: 0, y: 60 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.7, ease: "easeOut" }} className="max-w-[1180px] mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
 
         {/* ── Image ── */}
         <div className="relative reveal">
@@ -91,7 +95,7 @@ export default function VisionMission() {
 
         </div>
 
-      </div>
+      </motion.div>
     </section>
   );
 }

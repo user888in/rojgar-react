@@ -1,6 +1,7 @@
 import HeroStats from './HeroStats';
 import EyebrowBadge from '../ui/EyebrowBadge';
 import heroBg from '../../assets/images/about-bg-img.jpg';
+import { motion } from 'framer-motion';
 
 const STATS_CONFIG = [
   { key: 'activeJobs',      label: 'Jobs Posted'  },
@@ -22,7 +23,10 @@ export default function AboutHero() {
       <div className="absolute inset-0 z-10 bg-[linear-gradient(rgba(24,169,156,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(24,169,156,0.06)_1px,transparent_1px)] bg-[length:60px_60px]" />
 
       {/* Content */}
-      <div className="hero-content relative z-20 text-center px-5">
+      <motion.div  initial={{ opacity: 0, y: 60 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.7, ease: "easeOut" }} className="hero-content relative z-20 text-center px-5">
 
         {/* Eyebrow badge */}
         <EyebrowBadge text="Our Story" />
@@ -41,7 +45,7 @@ export default function AboutHero() {
         {/* Stats */}
         <HeroStats statsConfig={STATS_CONFIG} />
 
-      </div>
+      </motion.div>
     </section>
   );
 }

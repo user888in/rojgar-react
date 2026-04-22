@@ -1,11 +1,18 @@
 import { Link } from 'react-router-dom';
 import SectionTag from '../ui/SectionTag';
 import { BriefcaseBusiness, Search } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export default function AboutCTA() {
   return (
     <section className="bg-white px-4 py-[64px] text-center sm:px-6 sm:py-[90px]">
-      <div className="reveal mx-auto max-w-[680px]">
+      <motion.div
+        initial={{ opacity: 0, y: 60 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-50px" }}
+        transition={{ duration: 0.7, ease: "easeOut" }}
+        className="reveal mx-auto max-w-[680px]"
+      >
         <SectionTag
           text="Get Started"
           colorClass="text-[#18a99c] before:bg-[#18a99c]"
@@ -34,7 +41,7 @@ export default function AboutCTA() {
             <BriefcaseBusiness size={16} /> Post a Job
           </Link>
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }

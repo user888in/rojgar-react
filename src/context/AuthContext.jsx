@@ -20,7 +20,6 @@ const getStoredUser = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(getStoredUser);
   const [token, setToken] = useState(getStoredToken);
-  const [isLoading] = useState(false);
 
   const login = useCallback((newToken, newUser) => {
     localStorage.setItem(TOKEN_KEY, newToken);
@@ -36,6 +35,14 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
     setUser(null);
     window.dispatchEvent(new Event('authChange'));
+  }, []);
+
+  const updateUser = useCallback((partialUser) => {
+    setUser((prev) => {
+      const nextUser = { ...(prev || {}), ...(partialUser || {}) };
+      localStorage.setItem(USER_KEY, JSON.stringify(nextUser));
+      return nextUser;
+    });
   }, []);
 
   const isAuthenticated = !!token && !!user;
@@ -59,10 +66,10 @@ export const AuthProvider = ({ children }) => {
   const value = {
     user,
     token,
-    isLoading,
     isAuthenticated,
     login,
     logout,
+    updateUser,
     hasRole,
     getAuthHeaders,
   };

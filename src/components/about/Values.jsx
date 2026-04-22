@@ -1,5 +1,6 @@
 import { ChartLine, Heart, ShieldCheck, Zap } from 'lucide-react';
 import SectionTag from '../ui/SectionTag';
+import{motion} from 'framer-motion';
 
 const VALUES = [
   {
@@ -28,7 +29,13 @@ export default function Values() {
   return (
     <section className="relative overflow-hidden bg-[#091d33] py-[56px] sm:py-[72px]">
       <div className="pointer-events-none absolute -top-[60px] -right-[60px] h-[300px] w-[300px] rounded-full bg-[radial-gradient(circle,rgba(24,169,156,0.12)_0%,transparent_70%)]" />
-      <div className="relative z-10 mx-auto max-w-[1180px] px-6">
+      <motion.div
+        initial={{ opacity: 0, y: 60 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-50px" }}
+        transition={{ duration: 0.7, ease: "easeOut" }}
+        className="relative z-10 mx-auto max-w-[1180px] px-6"
+      >
         <div className="reveal mb-12 flex flex-col items-start gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <SectionTag
@@ -65,7 +72,7 @@ export default function Values() {
             );
           })}
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }
