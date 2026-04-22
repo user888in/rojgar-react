@@ -64,18 +64,23 @@ const RecruiterLogin = () => {
     candidates: 0, companies: 0, jobs: 0, recruiters: 0,
   });
 
-  // ── Check existing session 
+  // ── Check existing session
   useEffect(() => {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 5000);
+
     (async () => {
       try {
         const res = await fetch(`${API_BASE_URL}/auth/me`, {
           method: "GET", credentials: "include",
           headers: { "Content-Type": "application/json" },
+          signal: ctrl.signal,
         });
+        clearTimeout(timer);
         if (res.ok) {
           const user = await res.json();
-          if (user.role === "RECRUITER") {
-            login(user.token ?? "", user);
+          if (user && user.role === "RECRUITER" && (user.token || user.id || user.userId)) {
+            login(user.token ?? "authenticated", user);
             navigate("/recruiter/dashboard", { replace: true });
             return;
           }
@@ -83,6 +88,8 @@ const RecruiterLogin = () => {
       } catch (_) {}
       setChecking(false);
     })();
+
+    return () => { clearTimeout(timer); ctrl.abort(); };
   }, []);
 
   // ── Load stats — both endpoints like original loginForm.html ──
@@ -188,14 +195,6 @@ const RecruiterLogin = () => {
     }
   };
 
-  if (checking) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f1f5f9]">
-        <div className="w-8 h-8 border-4 border-[#091d33] border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
   return (
     <>
       <style>{`@keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }`}</style>
@@ -274,7 +273,12 @@ const RecruiterLogin = () => {
         </div>
 
         {/* RIGHT PANEL  */}
-        <div className="flex-1 bg-white flex flex-col justify-center px-16 py-16 relative">
+        <div className="relative flex-1 bg-white flex flex-col justify-center px-16 py-16">
+          {checking && (
+            <div className="absolute inset-0 bg-white/80 z-20 flex items-center justify-center">
+              <div className="w-8 h-8 border-4 border-[#091d33] border-t-transparent rounded-full animate-spin" />
+            </div>
+          )}
           <div className="max-w-[380px] w-full mx-auto" style={{ animation: "fadeUp .5s ease both" }}>
 
             {/* ── Role switcher AT THE TOP — before eyebrow ── */}

@@ -54,22 +54,31 @@ const UserLogin = () => {
 
   // ── Check existing session on mount ─────────────────────
   useEffect(() => {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 5000); // 5s timeout
+
     (async () => {
       try {
         const res = await fetch(`${API_BASE_URL}/auth/me`, {
           method: "GET",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
+          signal: ctrl.signal,
         });
+        clearTimeout(timer);
         if (res.ok) {
           const user = await res.json();
-          login(user.token ?? "", user);
-          navigate("/dashboard", { replace: true });
-          return;
+          if (user && (user.token || user.id || user.userId)) {
+            login(user.token ?? "authenticated", user);
+            navigate("/dashboard", { replace: true });
+            return;
+          }
         }
-      } catch (_) { /* no session */ }
+      } catch (_) { /* no session or timeout */ }
       setChecking(false);
     })();
+
+    return () => { clearTimeout(timer); ctrl.abort(); };
   }, []);
 
   // ── Load live stats for left panel ──────────────────────
@@ -88,7 +97,12 @@ const UserLogin = () => {
       if (e.persisted) {
         fetch(`${API_BASE_URL}/auth/me`, { method: "GET", credentials: "include" })
           .then((r) => r.ok ? r.json() : null)
-          .then((user) => { if (user) navigate("/dashboard", { replace: true }); })
+          .then((user) => {
+            if (user && (user.token || user.id || user.userId)) {
+              login(user.token ?? "authenticated", user);
+              navigate("/dashboard", { replace: true });
+            }
+          })
           .catch(() => {});
       }
     };
@@ -157,15 +171,6 @@ const UserLogin = () => {
     }
   };
 
-  // ── While session-check in flight, show nothing (or spinner) ─
-  if (checking) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f1f5f9]">
-        <div className="w-8 h-8 border-4 border-[#091d33] border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
   return (
     <div className="flex min-h-screen">
 
@@ -213,7 +218,12 @@ const UserLogin = () => {
       </div>
 
       {/* ══════════════ RIGHT PANEL ══════════════ */}
-      <div className="flex-1 bg-[#ffffff] flex items-center justify-center px-6 py-12">
+      <div className="relative flex-1 bg-[#ffffff] flex items-center justify-center px-6 py-12">
+        {checking && (
+          <div className="absolute inset-0 bg-white/80 z-20 flex items-center justify-center">
+            <div className="w-8 h-8 border-4 border-[#091d33] border-t-transparent rounded-full animate-spin" />
+          </div>
+        )}
         <div className="w-full max-w-[400px]">
 
           <p className="text-[#18a99c] text-xs font-bold uppercase tracking-widest mb-2">
