@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { API_BASE_URL } from "../config/api";
 import rojgar_shine_logo from "../assets/images/Rojgarshine White Logo-01.png"
+import { SquareArrowRightEnter } from "lucide-react";
 
 // ── Animated counter hook ──────────────────────────────────
 function useAnimatedCount(target, duration = 1300) {
@@ -182,12 +183,12 @@ const UserLogin = () => {
             <img
               src={rojgar_shine_logo}
               alt="RojgarShine"
-              className="h-[90px] w-auto object-contain"
+              className="h-[100px] w-auto object-contain"
             />
           </a>
 
           {/* Headline */}
-          <h1 className="text-white font-semibold leading-[1.15] tracking-tight mb-5 pl-5"
+          <h1 className="text-white font-semibold leading-[1.15] tracking-tight mb-5 px-12"
               style={{ fontSize: "clamp(32px, 3.5vw, 48px)" }}>
             Your next<br />
             <em className="not-italic text-[#18a99c]">big opportunity</em><br />
@@ -195,12 +196,12 @@ const UserLogin = () => {
           </h1>
 
           {/* Sub */}
-          <p className="text-white/50 text-[15px] leading-relaxed max-w-[340px] mb-12 pl-5">
+          <p className="text-white/50 text-[15px] leading-relaxed max-w-[340px] mb-12 px-12">
             Thousands of verified jobs, top companies, and the tools to get you hired — fast.
           </p>
 
           {/* Stats */}
-          <div className="flex items-stretch gap-8 pl-5">
+          <div className="flex items-stretch gap-8 px-12">
             <StatItem value={stats.jobs}      label="Live Jobs"    />
             <div className="w-px bg-white/10 self-stretch" />
             <StatItem value={stats.companies} label="Companies"    />
@@ -212,10 +213,10 @@ const UserLogin = () => {
       </div>
 
       {/* ══════════════ RIGHT PANEL ══════════════ */}
-      <div className="flex-1 bg-[#f1f5f9] flex items-center justify-center px-6 py-12">
-        <div className="w-full max-w-[440px]">
+      <div className="flex-1 bg-[#ffffff] flex items-center justify-center px-6 py-12">
+        <div className="w-full max-w-[400px]">
 
-          <p className="text-[#18a99c] text-xs font-semibold uppercase tracking-widest mb-2">
+          <p className="text-[#18a99c] text-xs font-bold uppercase tracking-widest mb-2">
             Welcome back
           </p>
           <h2 className="text-[#091d33] text-[28px] font-bold leading-tight tracking-tight mb-1">
@@ -235,7 +236,7 @@ const UserLogin = () => {
 
             {/* Email / Username */}
             <div>
-              <label htmlFor="usernameOrEmail" className="block text-[13px] font-medium text-[#091d33] mb-1.5">
+              <label htmlFor="usernameOrEmail" className="block text-[13px] font-medium text-black/80 mb-1.5">
                 Email or Username
               </label>
               <div className="relative">
@@ -261,7 +262,7 @@ const UserLogin = () => {
 
             {/* Password */}
             <div>
-              <label htmlFor="password" className="block text-[13px] font-medium text-[#091d33] mb-1.5">
+              <label htmlFor="password" className="block text-[13px] font-medium text-black/80 mb-1.5">
                 Password
               </label>
               <div className="relative">
@@ -304,7 +305,7 @@ const UserLogin = () => {
             </div>
 
             {/* Forgot */}
-            <div className="flex justify-end -mt-1">
+            <div className="flex justify-start -mt-1">
               <Link to="/forgot-password" className="text-[13px] text-[#18a99c] font-medium hover:underline">
                 Forgot password?
               </Link>
@@ -322,12 +323,10 @@ const UserLogin = () => {
                   Logging in...
                 </>
               ) : (
-                <>
-                  <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-                  </svg>
+                <div className="flex items-center gap-1">
+                  <SquareArrowRightEnter size={16}/>
                   Sign In
-                </>
+                </div>
               )}
             </button>
 
