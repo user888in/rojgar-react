@@ -9,6 +9,7 @@ const GuestRoute = () => {
     return <PageSpinner />;
   }
 
+  // If authenticated, redirect to appropriate dashboard
   if (isAuthenticated) {
     if (hasRole('ADMIN') || hasRole('SUB_ADMIN')) {
       return <Navigate to="/admin/dashboard" replace />;

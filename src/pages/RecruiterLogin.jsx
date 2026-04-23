@@ -90,7 +90,7 @@ const RecruiterLogin = () => {
     })();
 
     return () => { clearTimeout(timer); ctrl.abort(); };
-  }, []);
+  }, [login, navigate]);
 
   // ── Load stats — both endpoints like original loginForm.html ──
   useEffect(() => {

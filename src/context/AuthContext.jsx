@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect } from 'react';
 
 const AuthContext = createContext(null);
 
@@ -20,6 +20,20 @@ const getStoredUser = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(getStoredUser);
   const [token, setToken] = useState(getStoredToken);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Initialize auth state
+  useEffect(() => {
+    const storedToken = getStoredToken();
+    const storedUser = getStoredUser();
+
+    if (storedToken && storedUser) {
+      setToken(storedToken);
+      setUser(storedUser);
+    }
+
+    setIsLoading(false);
+  }, []);
 
   const login = useCallback((newToken, newUser) => {
     localStorage.setItem(TOKEN_KEY, newToken);
@@ -29,7 +43,18 @@ export const AuthProvider = ({ children }) => {
     window.dispatchEvent(new Event('authChange'));
   }, []);
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    try {
+      // Call server-side logout to clear session cookies
+      await fetch(`${process.env.VITE_API_BASE_URL || ''}/auth/logout`, {
+        method: 'POST',
+        credentials: 'include',
+      }).catch(() => {}); // Ignore errors
+    } catch (error) {
+      // Silently ignore logout API errors
+    }
+
+    // Clear local storage
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
     setToken(null);
@@ -67,6 +92,7 @@ export const AuthProvider = ({ children }) => {
     user,
     token,
     isAuthenticated,
+    isLoading,
     login,
     logout,
     updateUser,

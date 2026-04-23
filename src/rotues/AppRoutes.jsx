@@ -34,6 +34,7 @@ const RecruiterDashboard = lazy(() => import("../pages/recruiter/RecruiterDashbo
 const RecruiterPostJob = lazy(() => import("../pages/recruiter/RecruiterPostJob"));
 const RecruiterManageJobs = lazy(() => import("../pages/recruiter/RecruiterManageJobs"));
 const RecruiterApplications = lazy(() => import("../pages/recruiter/RecruiterApplications"));
+const RecruiterFeedback = lazy(() => import("../pages/recruiter/RecruiterFeedback"));
 const AdminDashboard = lazy(() => import("../pages/admin/AdminDashboard"));
 const AdminApplications = lazy(() => import("../pages/admin/AdminApplications"));
 const AdminCandidates = lazy(() => import("../pages/admin/AdminCandidates"));
@@ -95,6 +96,7 @@ const AppRoutes = () => {
           <Route path="/recruiter/post-job" element={<RecruiterPostJob />} />
           <Route path="/recruiter/jobs" element={<RecruiterManageJobs />} />
           <Route path="/recruiter/applications" element={<RecruiterApplications />} />
+          <Route path="/recruiter/feedback" element={<RecruiterFeedback />} />
         </Route>
       </Route>
 

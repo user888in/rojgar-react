@@ -64,7 +64,7 @@ const RecruiterSidebar = ({ displayName, initials, onProfileOpen, onCompanyOpen,
           <div className="rs-divider" />
 
           <div className="rs-section-label">Account</div>
-          <NavLink to="/feedback" end className={linkClass}>
+          <NavLink to="/recruiter/feedback" end className={linkClass}>
             <i className="bi bi-star-fill" /> Feedback
           </NavLink>
           <button

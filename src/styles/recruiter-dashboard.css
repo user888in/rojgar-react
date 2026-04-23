@@ -121,6 +121,7 @@
   overflow-y: auto;
   background: var(--bg);
   min-height: 100%;
+  width: 100%;
 }
 
 /* Page hero */
@@ -413,9 +414,56 @@
 
 /* Mobile tweaks */
 @media (max-width: 768px) {
-  .recruiter-shell .main-content { margin-left: 0; }
+  .recruiter-shell .main-content {
+    margin-left: 0;
+    width: 100%;
+  }
   .recruiter-shell .topbar { display: none; }
   .recruiter-shell .content { padding: 16px; }
+
+  /* Make stat cards stack better on mobile */
+  .recruiter-shell .stat-card {
+    padding: 16px 18px;
+  }
+
+  .recruiter-shell .stat-value {
+    font-size: 22px;
+  }
+
+  /* Adjust chart cards for mobile */
+  .recruiter-shell .chart-card {
+    padding: 16px 18px;
+  }
+
+  .recruiter-shell .chart-card-title {
+    font-size: 12px;
+    margin-bottom: 12px;
+  }
+
+  /* Make page hero more mobile-friendly */
+  .recruiter-shell .page-hero {
+    padding: 20px 24px;
+    margin-bottom: 20px;
+  }
+
+  .recruiter-shell .page-hero h4 {
+    font-size: 1.1rem;
+  }
+
+  .recruiter-shell .page-hero p {
+    font-size: 13px;
+  }
+
+  /* Ensure grids stack properly on mobile */
+  .recruiter-shell .grid {
+    width: 100%;
+  }
+
+  /* Make sure all dashboard elements take full width */
+  #dashboardSection {
+    width: 100%;
+    max-width: 100%;
+  }
 }
 
 /* Modal overlay (custom) */
@@ -616,8 +664,14 @@
 .rs-mobile-overlay.show { display: block; }
 
 @media (max-width: 768px) {
-  .rs-sidebar { left: -260px; }
-  .rs-sidebar.open { left: 0; box-shadow: 4px 0 24px rgba(0,0,0,0.3); }
+  .rs-sidebar {
+    display: none;
+  }
+  .rs-sidebar.open {
+    display: block;
+    left: 0;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.3);
+  }
   .rs-mobile-topbar { display: flex; }
 }
 
