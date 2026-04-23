@@ -250,7 +250,11 @@ const RecruiterManageJobsTable = ({
                   </td>
                   <td className="px-4 py-2.75">
                     <div className="flex flex-wrap gap-2">
-                      <button className="inline-flex items-center justify-center gap-1 rounded-lg border border-amber-300 bg-amber-50 px-3 py-1.25 text-xs font-semibold text-amber-700 transition hover:bg-amber-100 hover:border-amber-400 min-w-[55px]">
+                      <button
+                        type="button"
+                        onClick={() => handleJobAction('edit', job.id)}
+                        className="inline-flex items-center justify-center gap-1 rounded-lg border border-amber-300 bg-amber-50 px-3 py-1.25 text-xs font-semibold text-amber-700 transition hover:bg-amber-100 hover:border-amber-400 min-w-[55px]"
+                      >
                         <i className="bi bi-pencil"></i> Edit
                       </button>
                       {isJobOpen(job.status) ? (

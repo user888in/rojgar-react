@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { API_BASE_URL } from '../../config/api';
 import RecruiterManageJobsHero from '../../components/recruiter/manage-jobs/RecruiterManageJobsHero';
 import RecruiterManageJobsStats from '../../components/recruiter/manage-jobs/RecruiterManageJobsStats';
 import RecruiterManageJobsTable from '../../components/recruiter/manage-jobs/RecruiterManageJobsTable';
+import EditJobModal from '../../components/recruiter/manage-jobs/EditJobModal';
 
 const RecruiterManageJobs = () => {
   const { getAuthHeaders } = useAuth();
@@ -21,6 +22,20 @@ const RecruiterManageJobs = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
+
+  // Edit modal state
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editFormState, setEditFormState] = useState({ id: '', title: '', location: '', categoryId: '', salary: '', description: '' });
+  const [editSaving, setEditSaving] = useState(false);
+  const [editError, setEditError] = useState('');
+
+  // Categories for edit modal
+  const [categories, setCategories] = useState([]);
+  const [loadingCategories, setLoadingCategories] = useState(false);
+
+  // Toast
+  const [toast, setToast] = useState({ show: false, type: '', message: '' });
+  const toastTimeoutRef = useRef(null);
 
   // Load job counts
   const loadJobCounts = async () => {
@@ -42,6 +57,75 @@ const RecruiterManageJobs = () => {
       });
     } catch (error) {
       console.error('Error loading job counts:', error);
+    }
+  };
+
+  const showToast = (type, message) => {
+    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+    setToast({ show: true, type, message });
+    toastTimeoutRef.current = setTimeout(() => setToast({ show: false, type: '', message: '' }), 4000);
+  };
+
+  const loadCategoriesForEdit = async (selectedId) => {
+    setLoadingCategories(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/job-categories`, { headers: getAuthHeaders() });
+      if (!res.ok) throw new Error('Failed to load categories');
+      const data = await res.json();
+      const mapped = (data || []).map((c) => ({
+        id: c.categoryId ?? c.id ?? c._id ?? c.value,
+        name: c.categoryName ?? c.name ?? c.label ?? c.category ?? String(c),
+      }));
+      setCategories(mapped);
+    } catch (err) {
+      console.error('Error loading categories', err);
+      setCategories([]);
+    } finally {
+      setLoadingCategories(false);
+    }
+  };
+
+  const onEditFormChange = (field, value) => {
+    setEditFormState((p) => ({ ...p, [field]: value }));
+  };
+
+  const saveEditedJob = async () => {
+    setEditError('');
+    const { id, title, location, categoryId, salary, description } = editFormState;
+    if (!title || !title.trim()) {
+      setEditError('Job title is required.');
+      return;
+    }
+
+    setEditSaving(true);
+    try {
+      const payload = {
+        title: title.trim(),
+        location: location || '',
+        description: description || '',
+        ...(categoryId && { categoryId: Number(categoryId) }),
+        ...(salary && { salary: Number(salary) }),
+      };
+
+      const res = await fetch(`${API_BASE_URL}/jobs/${id}`, {
+        method: 'PUT',
+        headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const e = await res.json().catch(() => ({}));
+        throw new Error(e?.message || 'Update failed');
+      }
+
+      setEditModalOpen(false);
+      showToast('success', 'Job updated successfully ✓');
+      await Promise.all([loadJobCounts(), loadJobs(currentPage, filterStatus, searchQuery)]);
+    } catch (err) {
+      console.error('Update job error', err);
+      setEditError(err.message || 'Failed to update job');
+    } finally {
+      setEditSaving(false);
     }
   };
 
@@ -142,6 +226,24 @@ const RecruiterManageJobs = () => {
 
   // Handle job actions (edit, close, reopen)
   const handleJobAction = async (action, jobId) => {
+    // Open edit modal locally
+    if (action === 'edit') {
+      const job = jobs.find((j) => j.id === jobId);
+      if (!job) return;
+      setEditFormState({
+        id: job.id,
+        title: job.title || '',
+        location: job.location || '',
+        categoryId: job.categoryId ?? '',
+        salary: job.salary ?? '',
+        description: job.description || '',
+      });
+      await loadCategoriesForEdit(job.categoryId);
+      setEditError('');
+      setEditModalOpen(true);
+      return;
+    }
+
     try {
       let url, method = 'PUT';
 
@@ -208,6 +310,23 @@ const RecruiterManageJobs = () => {
           totalPages={totalPages}
           totalElements={totalElements}
           onJobAction={handleJobAction}
+        />
+        {toast.show && (
+          <div className={`fixed bottom-6 right-6 z-50 rounded-lg p-3.5 ${toast.type === 'success' ? 'bg-emerald-50 border border-emerald-200 text-emerald-700' : 'bg-rose-50 border border-rose-200 text-rose-700'}`}>
+            <span className="text-sm">{toast.message}</span>
+          </div>
+        )}
+
+        <EditJobModal
+          open={editModalOpen}
+          onClose={() => setEditModalOpen(false)}
+          formState={editFormState}
+          onFormChange={onEditFormChange}
+          onSave={saveEditedJob}
+          saving={editSaving}
+          error={editError}
+          categories={categories}
+          loadingCategories={loadingCategories}
         />
       </div>
     </div>
