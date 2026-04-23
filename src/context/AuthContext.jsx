@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { API_BASE_URL } from '../config/api';
 
 const AuthContext = createContext(null);
 
@@ -46,7 +47,7 @@ export const AuthProvider = ({ children }) => {
   const logout = useCallback(async () => {
     try {
       // Call server-side logout to clear session cookies
-      await fetch(`${process.env.VITE_API_BASE_URL || ''}/auth/logout`, {
+      await fetch(`${API_BASE_URL}/auth/logout`, {
         method: 'POST',
         credentials: 'include',
       }).catch(() => {}); // Ignore errors

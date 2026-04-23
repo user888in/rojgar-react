@@ -63,6 +63,7 @@ const RecruiterLogin = () => {
   const [stats,    setStats]    = useState({
     candidates: 0, companies: 0, jobs: 0, recruiters: 0,
   });
+  const getSessionToken = (user) => user?.accessToken || user?.token || "";
 
   // ── Check existing session
   useEffect(() => {
@@ -79,8 +80,9 @@ const RecruiterLogin = () => {
         clearTimeout(timer);
         if (res.ok) {
           const user = await res.json();
-          if (user && user.role === "RECRUITER" && (user.accessToken || user.token || user.id || user.userId)) {
-            login(user.accessToken ?? user.token ?? "", user);
+          const sessionToken = getSessionToken(user);
+          if (user && user.role === "RECRUITER" && sessionToken) {
+            login(sessionToken, user);
             navigate("/recruiter/dashboard", { replace: true });
             return;
           }
@@ -115,13 +117,19 @@ const RecruiterLogin = () => {
       if (e.persisted) {
         fetch(`${API_BASE_URL}/auth/me`, { method: "GET", credentials: "include" })
           .then(r => r.ok ? r.json() : null)
-          .then(user => { if (user?.role === "RECRUITER") navigate("/recruiter/dashboard", { replace: true }); })
+          .then(user => {
+            const sessionToken = getSessionToken(user);
+            if (user?.role === "RECRUITER" && sessionToken) {
+              login(sessionToken, user);
+              navigate("/recruiter/dashboard", { replace: true });
+            }
+          })
           .catch(() => {});
       }
     };
     window.addEventListener("pageshow", handler);
     return () => window.removeEventListener("pageshow", handler);
-  }, []);
+  }, [login, navigate]);
 
   const handleChange = (e) =>
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
