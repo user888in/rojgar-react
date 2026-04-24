@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 
@@ -13,21 +13,47 @@ const EditJobModal = ({
   categories = [],
   loadingCategories = false,
 }) => {
-  if (!open) return null;
+  const modalRef = useRef(null);
 
   useEffect(() => {
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = prev || '';
+    if (!open) return;
+
+    // Prevent background scrolling while allowing modal content scrolling.
+    const blockScroll = (e) => {
+      // If the event originated inside the modal, allow it (so modal can scroll)
+      if (modalRef.current && modalRef.current.contains(e.target)) return;
+      e.preventDefault();
+      e.stopPropagation();
     };
-  }, []);
+
+    const blockKey = (e) => {
+      // Allow keyboard interaction when focus is inside modal
+      if (modalRef.current && modalRef.current.contains(document.activeElement)) return;
+      const blockedKeys = ['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '];
+      if (blockedKeys.includes(e.key)) {
+        e.preventDefault();
+      }
+    };
+
+    window.addEventListener('wheel', blockScroll, { passive: false });
+    window.addEventListener('touchmove', blockScroll, { passive: false });
+    window.addEventListener('keydown', blockKey, { passive: false });
+
+    return () => {
+      window.removeEventListener('wheel', blockScroll);
+      window.removeEventListener('touchmove', blockScroll);
+      window.removeEventListener('keydown', blockKey);
+    };
+  }, [open]);
+
+  if (!open) return null;
 
   return (
     <div className="fixed inset-0 flex items-center justify-center" style={{ zIndex: 99999 }}>
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} style={{ zIndex: 99998 }} />
+      <div className="absolute inset-0 bg-black/40" onClick={onClose} style={{ zIndex: 99998 }} onWheel={(e) => e.preventDefault()} onTouchMove={(e) => e.preventDefault()} />
 
       <div
+        ref={modalRef}
         className="relative mx-4 w-full max-w-2xl rounded-[20px] bg-white shadow-2xl"
         style={{ zIndex: 99999, maxHeight: '92vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
       >
