@@ -104,14 +104,67 @@ const tTimeAgo = (dateStr) => {
   return `${Math.floor(days / 365)}y ago`;
 };
 
+const formatHeroStat = (value) => {
+  const num = Number(value) || 0;
+  if (num >= 1_000_000) {
+    return `${(num / 1_000_000).toFixed(num % 1_000_000 === 0 ? 0 : 1).replace(/\.0$/, "")}m+`;
+  }
+  if (num >= 1_000) {
+    return `${(num / 1_000).toFixed(num % 1_000 === 0 ? 0 : 1).replace(/\.0$/, "")}K+`;
+  }
+  return `${num}+`;
+};
+
+const useAnimatedHeroStat = (target, duration = 1300) => {
+  const [display, setDisplay] = useState("0+");
+
+  useEffect(() => {
+    const finalValue = Number(target) || 0;
+    if (finalValue <= 0) {
+      setDisplay("0+");
+      return;
+    }
+
+    const steps = 45;
+    const stepTime = duration / steps;
+    let current = 0;
+
+    const timer = setInterval(() => {
+      current += finalValue / steps;
+      if (current >= finalValue) {
+        clearInterval(timer);
+        setDisplay(formatHeroStat(finalValue));
+      } else {
+        setDisplay(formatHeroStat(Math.floor(current)));
+      }
+    }, stepTime);
+
+    return () => clearInterval(timer);
+  }, [target, duration]);
+
+  return display;
+};
+
+const HeroStatItem = ({ value, label }) => {
+  const displayValue = useAnimatedHeroStat(value);
+
+  return (
+    <div className="flex flex-col">
+      <strong className="text-2xl font-extrabold text-white">
+        {displayValue}
+      </strong>
+      <span className="text-[0.75rem] text-white/50 mt-px">{label}</span>
+    </div>
+  );
+};
 const Home = () => {
   const navigate = useNavigate();
 
   // State for hero stats
   const [stats, setStats] = useState({
-    activeJobs: "—",
-    companies: "—",
-    jobSeekers: "—",
+    activeJobs: 0,
+    companies: 0,
+    jobSeekers: 0,
   });
 
   // State for companies slider
@@ -220,9 +273,9 @@ const Home = () => {
       if (response.ok) {
         const data = await response.json();
         setStats({
-          activeJobs: data.activeJobs?.toLocaleString() || "0",
-          companies: data.totalCompanies?.toLocaleString() || "0",
-          jobSeekers: data.totalJobSeekers?.toLocaleString() || "0",
+          activeJobs: Number(data.activeJobs) || 0,
+          companies: Number(data.totalCompanies) || 0,
+          jobSeekers: Number(data.totalJobSeekers) || 0,
         });
       } else {
         console.error(`Stats API error: HTTP ${response.status}`);
@@ -842,32 +895,10 @@ const Home = () => {
                 </button>
               </div>
 
-              {/* Stats */}
               <div className="flex flex-wrap gap-7 mt-8">
-                <div className="flex flex-col">
-                  <strong className="text-2xl font-extrabold text-white">
-                    {stats.activeJobs}+
-                  </strong>
-                  <span className="text-[0.75rem] text-white/50 mt-px">
-                    Active Jobs
-                  </span>
-                </div>
-                <div className="flex flex-col">
-                  <strong className="text-2xl font-extrabold text-white">
-                    {stats.companies}+
-                  </strong>
-                  <span className="text-[0.75rem] text-white/50 mt-px">
-                    Companies
-                  </span>
-                </div>
-                <div className="flex flex-col">
-                  <strong className="text-2xl font-extrabold text-white">
-                    {stats.jobSeekers}+
-                  </strong>
-                  <span className="text-[0.75rem] text-white/50 mt-px">
-                    Job Seekers
-                  </span>
-                </div>
+                <HeroStatItem value={stats.activeJobs} label="Active Jobs" />
+                <HeroStatItem value={stats.companies} label="Companies" />
+                <HeroStatItem value={stats.jobSeekers} label="Job Seekers" />
               </div>
             </div>
 
@@ -1574,3 +1605,5 @@ const Home = () => {
 };
 
 export default Home;
+
+

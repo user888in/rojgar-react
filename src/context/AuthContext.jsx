@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import { API_BASE_URL } from '../config/api';
 
 const AuthContext = createContext(null);
@@ -22,6 +22,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(getStoredUser);
   const [token, setToken] = useState(getStoredToken);
   const [isLoading, setIsLoading] = useState(true);
+  const refreshingRef = useRef(null); // prevents concurrent refresh calls
 
   // Initialize auth state
   useEffect(() => {
@@ -89,6 +90,74 @@ export const AuthProvider = ({ children }) => {
     return headers;
   }, [token]);
 
+  // Refresh access token using cookie-based refresh token
+  const refreshAccessToken = useCallback(async () => {
+    if (refreshingRef.current) return refreshingRef.current;
+    refreshingRef.current = (async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/auth/refresh`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        if (!res.ok) return false;
+        // If the server returns a new token, save it
+        const data = await res.json().catch(() => null);
+        if (data?.token) {
+          localStorage.setItem(TOKEN_KEY, data.token);
+          setToken(data.token);
+        }
+        return true;
+      } catch {
+        return false;
+      } finally {
+        refreshingRef.current = null;
+      }
+    })();
+    return refreshingRef.current;
+  }, []);
+
+  // Fetch wrapper with automatic token refresh on 401/403
+  const authFetch = useCallback(async (url, options = {}) => {
+    options.credentials = 'include';
+    const isFormData = options.body instanceof FormData;
+    options.headers = {
+      ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
+      ...options.headers,
+    };
+    if (token) {
+      options.headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    let res;
+    try {
+      res = await fetch(url, options);
+    } catch (err) {
+      throw err;
+    }
+
+    if (res.status === 401 || res.status === 403) {
+      const refreshed = await refreshAccessToken();
+      if (refreshed) {
+        // Re-read token after refresh in case it changed
+        const currentToken = localStorage.getItem(TOKEN_KEY);
+        if (currentToken) {
+          options.headers['Authorization'] = `Bearer ${currentToken}`;
+        }
+        try {
+          res = await fetch(url, options);
+        } catch (err) {
+          throw err;
+        }
+        if (res.status === 401 || res.status === 403) {
+          // Still unauthorized after refresh — force logout
+          await logout();
+        }
+      }
+    }
+    return res;
+  }, [token, refreshAccessToken, logout]);
+
   const value = {
     user,
     token,
@@ -99,6 +168,7 @@ export const AuthProvider = ({ children }) => {
     updateUser,
     hasRole,
     getAuthHeaders,
+    authFetch,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
