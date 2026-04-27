@@ -28,7 +28,7 @@ import {
 import { API_BASE_URL } from '../../config/api';
 import footerLogo from '../../assets/images/Rojgarshine White Logo-01.png';
 
-const SIDEBAR_W = 280;
+const SIDEBAR_W = 260;
 
 const sections = [
   {
@@ -294,7 +294,7 @@ const AdminLayout = () => {
                     style={{
                       padding: '10px 20px',
                       color: 'rgba(255,255,255,0.55)',
-                      fontSize: '15px',
+                      fontSize: '14px',
                       fontWeight: 400,
                       opacity: 0.35,
                       borderLeft: '3px solid transparent',
@@ -312,7 +312,7 @@ const AdminLayout = () => {
                     style={{
                       padding: '10px 20px',
                       color: active ? '#14b8a6' : 'rgba(255,255,255,0.55)',
-                      fontSize: '15px',
+                      fontSize: '14px',
                       fontWeight: active ? 600 : 400,
                       background: active ? 'rgba(13,148,136,0.15)' : 'transparent',
                       borderLeft: active ? '3px solid #14b8a6' : '3px solid transparent',
@@ -351,7 +351,7 @@ const AdminLayout = () => {
             style={{
               padding: '10px 20px',
               color: 'rgba(255,255,255,0.55)',
-              fontSize: '15px',
+              fontSize: '14px',
               fontWeight: 400,
               borderLeft: '3px solid transparent',
               fontFamily: "'DM Sans', sans-serif",

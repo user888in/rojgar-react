@@ -354,7 +354,7 @@ const AdminDashboard = () => {
       <div className="sticky top-0 z-[100] bg-white px-8 py-4 mb-6 shadow-[0_2px_8px_rgba(0,0,0,0.06)] border-b border-[#e8ecf1]" style={{ marginLeft: '-32px', marginRight: '-32px', marginTop: '-32px', paddingLeft: '32px', paddingRight: '32px', paddingTop: '16px', paddingBottom: '16px' }}>
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
-            <p className="text-[22px] font-extrabold text-[#0f172a] m-0 leading-tight">Dashboard</p>
+            <p className="text-[20px] font-extrabold text-[#0f172a] m-0 leading-tight">Dashboard</p>
             <p className="text-[13px] text-[#64748b] m-0 mt-0.5">
               {todayDate}
             </p>
