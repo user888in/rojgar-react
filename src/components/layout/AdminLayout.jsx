@@ -158,6 +158,10 @@ const AdminLayout = () => {
         username: profileForm.username.trim(),
         phone: profileForm.phone.trim(),
       });
+      // Auto-close modal after 1.5 seconds
+      setTimeout(() => {
+        setProfileOpen(false);
+      }, 1500);
     } catch {
       setProfileAlert({ type: 'error', msg: 'Failed to update profile. Please try again.' });
     } finally {
@@ -205,7 +209,7 @@ const AdminLayout = () => {
         >
           <Menu size={24} />
         </button>
-        <Link to="/admin/dashboard" className="flex items-center">
+        <Link to="/recruiter" className="flex items-center">
           <img src={footerLogo} alt="RojgarShine" className="h-12 w-auto object-contain" style={{ filter: 'brightness(1.08)' }} />
         </Link>
         <div className="w-6" />
@@ -247,7 +251,7 @@ const AdminLayout = () => {
         {/* Brand */}
         <div className="flex flex-col items-center" style={{ padding: '22px 20px 16px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
           <div>
-            <Link to="/admin/dashboard">
+            <Link to="/recruiter">
               <img
                 src={footerLogo}
                 alt="RojgarShine"

@@ -14,6 +14,7 @@ import About from "../pages/About";
 import Blog from "../pages/Blog";
 import Services from "../pages/Services";
 import Feedback from "../pages/Feedback";
+import GovtJobs from "../pages/GovtJobs";
 
 // Lazy-loaded pages
 const JobDetail = lazy(() => import("../pages/JobDetail"));
@@ -62,6 +63,7 @@ const AppRoutes = () => {
         <Route path="/services" element={<Services />} />
         <Route path="/blog" element={<Blog />} />
         <Route path="/feedback" element={<Feedback />} />
+        <Route path="/govt-jobs" element={<GovtJobs />} />
       </Route>
 
       {/* Guest only routes */}

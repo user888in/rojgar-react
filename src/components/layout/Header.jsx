@@ -20,6 +20,7 @@ import {
   PlusCircle,
   Briefcase,
   Users,
+  Landmark,
 } from 'lucide-react';
 import rojgar_shine_logo from "../../assets/images/Rojgarshine logo-01.png"
 
@@ -31,6 +32,7 @@ function initials(name) {
 
 const jobSeekerLinks = [
   { to: '/jobs', icon: Search, label: 'Jobs', page: 'jobs' },
+  { to: '/govt-jobs', icon: Landmark, label: 'Govt Jobs', page: 'govt', badge: 'New' },
   { to: '/about', icon: Info, label: 'About Us', page: 'about' },
   { to: '/services', icon: LayoutGrid, label: 'Services', page: 'services' },
   { to: '/blog', icon: Bookmark, label: 'Blog', page: 'blog' },
@@ -41,7 +43,9 @@ const Header = () => {
   const location = useLocation();
   const { user, isAuthenticated, isLoading, logout } = useAuth();
 
+  const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUB_ADMIN';
   const isRecruiterMode = location.pathname.startsWith('/recruiter');
+  const isRecruiterHomePage = location.pathname === '/recruiter';
 
   const recruiterLinks = [
     { to: isAuthenticated ? '/recruiter/dashboard' : '/recruiter/login', icon: LayoutDashboard, label: 'Dashboard', page: 'dashboard' },
@@ -50,7 +54,8 @@ const Header = () => {
     { to: isAuthenticated ? '/recruiter/applications' : '/recruiter/login', icon: Users, label: 'Applications', page: 'applications' },
   ];
 
-  const navLinks = isRecruiterMode ? recruiterLinks : jobSeekerLinks;
+  let navLinks = isRecruiterMode ? recruiterLinks : jobSeekerLinks;
+
   const logoTo = isRecruiterMode ? '/recruiter' : '/';
   const switchTo = isRecruiterMode ? '/' : '/recruiter';
   const switchLabel = isRecruiterMode ? 'Job Seeker' : 'For Recruiters';
@@ -62,6 +67,13 @@ const Header = () => {
   const burgerRef = useRef(null);
   const mobileRef = useRef(null);
 
+  const isUserDashboard = location.pathname === '/dashboard';
+
+  // Header should be hidden ONLY on the User Dashboard for standard users
+  if (!isAdmin && isUserDashboard) {
+    return null;
+  }
+
   const isActive = useCallback(
     (page) => {
       const path = location.pathname;
@@ -70,6 +82,7 @@ const Header = () => {
       if (page === 'services') return path === '/services';
       if (page === 'blog') return path === '/blog';
       if (page === 'feedbacks') return path === '/feedback';
+      if (page === 'govt') return path === '/govt-jobs';
       if (page === 'dashboard') return path === '/recruiter/dashboard' || path === '/dashboard';
       if (page === 'post') return path === '/recruiter/post-job';
       if (page === 'manage') return path === '/recruiter/jobs';
@@ -111,15 +124,15 @@ const Header = () => {
   const avatarInner = user?.profileImg ? (
     <img
       src={user.profileImg}
-      alt={initials(user.fullName)}
+      alt={isAdmin ? 'Admin' : initials(user.fullName)}
       className="w-full h-full object-cover rounded-full"
       onError={(e) => {
         e.target.style.display = 'none';
-        e.target.parentElement.textContent = initials(user.fullName);
+        e.target.parentElement.textContent = isAdmin ? 'A' : initials(user.fullName);
       }}
     />
   ) : (
-    initials(user?.fullName)
+    isAdmin ? 'A' : initials(user?.fullName)
   );
 
   const firstName = (user?.fullName || 'User').split(' ')[0];
@@ -147,14 +160,18 @@ const Header = () => {
             <Link
               key={item.to}
               to={item.to}
-              className={`flex items-center gap-[6px] py-[7px] px-[13px] rounded-lg text-[13px] font-medium no-underline transition-colors whitespace-nowrap border-none bg-transparent cursor-pointer hover:bg-[#f1f5f9] hover:text-[#091d33] ${
-                isActive(item.page)
-                  ? 'bg-[#e6f7f5] text-[#18a99c] font-semibold'
-                  : 'text-[#64748b]'
-              }`}
+              className={`relative flex items-center gap-[6px] py-[7px] px-[13px] rounded-lg text-[13px] font-medium no-underline transition-colors whitespace-nowrap border-none bg-transparent cursor-pointer hover:bg-[#f1f5f9] hover:text-[#091d33] ${isActive(item.page)
+                ? 'bg-[#e6f7f5] text-[#18a99c] font-semibold'
+                : 'text-[#64748b]'
+                }`}
             >
               <item.icon size={14} />
               {item.label}
+              {item.badge && (
+                <span className="absolute -top-[3px] -right-[1px] px-[5px] py-[4px] text-[7.5px] font-bold text-white bg-red-700 rounded uppercase leading-none">
+                  {item.badge}
+                </span>
+              )}
             </Link>
           ))}
         </div>
@@ -174,7 +191,7 @@ const Header = () => {
           <div className="relative" ref={ddRef}>
             {isLoading ? (
               <div className="w-[120px] h-9 rounded-full bg-[#e8ecf0] animate-pulse" />
-            ) : isAuthenticated ? (
+            ) : (isAuthenticated && !(isRecruiterHomePage && user?.role !== 'RECRUITER')) ? (
               <>
                 <button
                   onClick={(e) => {
@@ -187,20 +204,19 @@ const Header = () => {
                     {avatarInner}
                   </div>
                   <span className="text-[13px] font-semibold text-[#091d33] max-w-[100px] overflow-hidden text-ellipsis whitespace-nowrap max-[480px]:hidden">
-                    {firstName}
+                    {isAdmin ? 'Admin' : firstName}
                   </span>
                   <ChevronDown size={10} className="text-[#94a3b8]" />
                 </button>
 
                 {/* Dropdown */}
                 <div
-                  className={`absolute top-[calc(100%+10px)] right-0 bg-white border-[0.5px] border-[#e2e8f0] rounded-[14px] shadow-[0_10px_30px_rgba(0,0,0,0.10)] min-w-[220px] z-[9999] overflow-hidden ${
-                    ddOpen ? 'block' : 'hidden'
-                  }`}
+                  className={`absolute top-[calc(100%+10px)] right-0 bg-white border-[0.5px] border-[#e2e8f0] rounded-[14px] shadow-[0_10px_30px_rgba(0,0,0,0.10)] min-w-[220px] z-[9999] overflow-hidden ${ddOpen ? 'block' : 'hidden'
+                    }`}
                 >
                   <div className="py-[14px] px-4 pb-3 border-b-[0.5px] border-[#f0f4f8]">
                     <div className="text-[13px] font-bold text-[#091d33]">
-                      {user?.fullName || 'User'}
+                      {isAdmin ? 'Admin' : (user?.fullName || 'User')}
                     </div>
                     <div className="text-[11px] text-[#9aabb8] mt-[2px]">
                       {user?.email || ''}
@@ -215,21 +231,21 @@ const Header = () => {
                   {!isRecruiterMode && (
                     <>
                       <Link
-                        to="/dashboard"
+                        to={isAdmin ? '/admin/dashboard' : '/dashboard'}
                         className="flex items-center gap-[10px] w-full py-[10px] px-4 text-[13px] text-[#374151] no-underline bg-transparent border-none text-left cursor-pointer transition-colors hover:bg-[#f8fafc] hover:text-[#091d33]"
                       >
                         <LayoutDashboard size={15} className="text-[#18a99c] shrink-0" />
                         Dashboard
                       </Link>
                       <Link
-                        to="/profile"
+                        to={isAdmin ? '/admin/dashboard' : '/dashboard'}
                         className="flex items-center gap-[10px] w-full py-[10px] px-4 text-[13px] text-[#374151] no-underline bg-transparent border-none text-left cursor-pointer transition-colors hover:bg-[#f8fafc] hover:text-[#091d33]"
                       >
                         <UserCircle size={15} className="text-[#185FA5] shrink-0" />
                         My Profile
                       </Link>
                       <Link
-                        to="/my-jobs"
+                        to={isAdmin ? '/admin/dashboard' : '/dashboard'}
                         className="flex items-center gap-[10px] w-full py-[10px] px-4 text-[13px] text-[#374151] no-underline bg-transparent border-none text-left cursor-pointer transition-colors hover:bg-[#f8fafc] hover:text-[#091d33]"
                       >
                         <FileText size={15} className="text-[#f59e0b] shrink-0" />
@@ -249,7 +265,7 @@ const Header = () => {
                   {isRecruiterMode && (
                     <>
                       <Link
-                        to="/recruiter/dashboard"
+                        to={isAdmin ? '/admin/dashboard' : '/recruiter/dashboard'}
                         className="flex items-center gap-[10px] w-full py-[10px] px-4 text-[13px] text-[#374151] no-underline bg-transparent border-none text-left cursor-pointer transition-colors hover:bg-[#f8fafc] hover:text-[#091d33]"
                       >
                         <LayoutDashboard size={15} className="text-[#18a99c] shrink-0" />
@@ -320,22 +336,25 @@ const Header = () => {
       {/* Mobile drawer */}
       <div
         ref={mobileRef}
-        className={`fixed top-[62px] left-0 right-0 bg-white border-b border-[#e2e8f0] shadow-[0_6px_20px_rgba(0,0,0,0.08)] py-3 px-4 pb-5 z-[9998] flex-col gap-1 ${
-          mobileOpen ? 'flex' : 'hidden'
-        }`}
+        className={`fixed top-[62px] left-0 right-0 bg-white border-b border-[#e2e8f0] shadow-[0_6px_20px_rgba(0,0,0,0.08)] py-3 px-4 pb-5 z-[9998] flex-col gap-1 ${mobileOpen ? 'flex' : 'hidden'
+          }`}
       >
         {navLinks.map((item) => (
           <Link
             key={item.to}
             to={item.to}
-            className={`flex items-center gap-[6px] w-full rounded-[9px] py-[10px] px-[14px] text-sm no-underline transition-colors border-none bg-transparent cursor-pointer hover:bg-[#f1f5f9] hover:text-[#091d33] ${
-              isActive(item.page)
-                ? 'bg-[#e6f7f5] text-[#18a99c] font-semibold'
-                : 'text-[#64748b]'
-            }`}
+            className={`relative flex items-center gap-[6px] w-full rounded-[9px] py-[10px] px-[14px] text-sm no-underline transition-colors border-none bg-transparent cursor-pointer hover:bg-[#f1f5f9] hover:text-[#091d33] ${isActive(item.page)
+              ? 'bg-[#e6f7f5] text-[#18a99c] font-semibold'
+              : 'text-[#64748b]'
+              }`}
           >
             <item.icon size={16} />
             {item.label}
+            {item.badge && (
+              <span className="absolute top-1.5 right-2 px-2 py-0.5 text-[8px] font-bold text-white bg-red-500 rounded-full uppercase shadow-[0_2px_4px_rgba(239,68,68,0.3)] leading-none">
+                {item.badge}
+              </span>
+            )}
           </Link>
         ))}
 
@@ -349,27 +368,27 @@ const Header = () => {
           {isRecruiterMode ? 'Switch to Job Seeker' : 'Switch to Recruiter'}
         </Link>
 
-        {isAuthenticated && (
+        {isAuthenticated && !(isRecruiterHomePage && user?.role !== 'RECRUITER') && (
           <>
             <div className="h-px bg-[#e2e8f0] my-2" />
             {!isRecruiterMode && (
               <>
                 <Link
-                  to="/dashboard"
+                  to={isAdmin ? '/admin/dashboard' : '/dashboard'}
                   className="flex items-center gap-[6px] w-full rounded-[9px] py-[10px] px-[14px] text-sm no-underline transition-colors border-none bg-transparent cursor-pointer hover:bg-[#f1f5f9] hover:text-[#091d33] text-[#64748b]"
                 >
                   <LayoutDashboard size={16} className="text-[#18a99c]" />
                   Dashboard
                 </Link>
                 <Link
-                  to="/profile"
+                  to={isAdmin ? '/admin/dashboard' : '/dashboard'}
                   className="flex items-center gap-[6px] w-full rounded-[9px] py-[10px] px-[14px] text-sm no-underline transition-colors border-none bg-transparent cursor-pointer hover:bg-[#f1f5f9] hover:text-[#091d33] text-[#64748b]"
                 >
                   <UserCircle size={16} className="text-[#185FA5]" />
                   My Profile
                 </Link>
                 <Link
-                  to="/my-jobs"
+                  to={isAdmin ? '/admin/dashboard' : '/dashboard'}
                   className="flex items-center gap-[6px] w-full rounded-[9px] py-[10px] px-[14px] text-sm no-underline transition-colors border-none bg-transparent cursor-pointer hover:bg-[#f1f5f9] hover:text-[#091d33] text-[#64748b]"
                 >
                   <FileText size={16} className="text-[#f59e0b]" />
@@ -380,7 +399,7 @@ const Header = () => {
             {isRecruiterMode && (
               <>
                 <Link
-                  to="/recruiter/dashboard"
+                  to={isAdmin ? '/admin/dashboard' : '/recruiter/dashboard'}
                   className="flex items-center gap-[6px] w-full rounded-[9px] py-[10px] px-[14px] text-sm no-underline transition-colors border-none bg-transparent cursor-pointer hover:bg-[#f1f5f9] hover:text-[#091d33] text-[#64748b]"
                 >
                   <LayoutDashboard size={16} className="text-[#18a99c]" />
@@ -408,7 +427,7 @@ const Header = () => {
           </>
         )}
 
-        {!isAuthenticated && (
+        {(!isAuthenticated || (isRecruiterHomePage && user?.role !== 'RECRUITER')) && (
           <>
             <div className="h-px bg-[#e2e8f0] my-2" />
             <Link
