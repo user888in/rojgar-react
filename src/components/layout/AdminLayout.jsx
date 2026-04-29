@@ -24,6 +24,7 @@ import {
   CheckCircle,
   AlertCircle,
   ChevronDown,
+  SquarePen,
 } from 'lucide-react';
 import { API_BASE_URL } from '../../config/api';
 import footerLogo from '../../assets/images/Rojgarshine White Logo-01.png';
@@ -47,6 +48,7 @@ const sections = [
       { to: '/admin/jobs', icon: Briefcase, label: 'Jobs', page: 'jobs' },
       { to: '/admin/job-categories', icon: LayoutGrid, label: 'Job Categories', page: 'jobCategories' },
       { to: '/admin/blog-categories', icon: BookOpen, label: 'Blog Categories', page: 'blogCategories' },
+      { to: '/admin/blog', icon: SquarePen, label: 'Manage Blogs', page: 'blogs' },
       { to: '/admin/enquiries', icon: Mail, label: 'Contact Enquiries', page: 'contactEnquiries' },
       { to: '/admin/feedback', icon: MessageSquare, label: 'Feedback', page: 'feedback' },
       { to: '/admin/security-questions', icon: Shield, label: 'Security Questions', page: 'securityQuestions', id: 'menuSecurityQuestions' },
@@ -480,22 +482,20 @@ const AdminLayout = () => {
               <button
                 onClick={() => { setProfileTab('edit'); setProfileAlert({ type: '', msg: '' }); }}
                 type="button"
-                className={`flex items-center gap-[7px] px-[18px] py-[14px] text-[13.5px] font-medium cursor-pointer bg-transparent border-b-2 transition-all ${
-                  profileTab === 'edit'
+                className={`flex items-center gap-[7px] px-[18px] py-[14px] text-[13.5px] font-medium cursor-pointer bg-transparent border-b-2 transition-all ${profileTab === 'edit'
                     ? 'text-[#0d9488] border-[#0d9488] font-semibold'
                     : 'text-[#64748b] border-transparent hover:text-[#0f172a]'
-                }`}
+                  }`}
               >
                 <Pencil size={14} /> Edit Profile
               </button>
               <button
                 onClick={() => { setProfileTab('password'); setPwAlert({ type: '', msg: '' }); }}
                 type="button"
-                className={`flex items-center gap-[7px] px-[18px] py-[14px] text-[13.5px] font-medium cursor-pointer bg-transparent border-b-2 transition-all ${
-                  profileTab === 'password'
+                className={`flex items-center gap-[7px] px-[18px] py-[14px] text-[13.5px] font-medium cursor-pointer bg-transparent border-b-2 transition-all ${profileTab === 'password'
                     ? 'text-[#0d9488] border-[#0d9488] font-semibold'
                     : 'text-[#64748b] border-transparent hover:text-[#0f172a]'
-                }`}
+                  }`}
               >
                 <Shield size={14} /> Change Password
               </button>
@@ -505,11 +505,10 @@ const AdminLayout = () => {
             {profileTab === 'edit' && (
               <div className="p-6 bg-white">
                 {profileAlert.msg && (
-                  <div className={`flex items-start gap-[10px] px-[14px] py-3 rounded-[10px] text-[13px] mb-[14px] ${
-                    profileAlert.type === 'success'
+                  <div className={`flex items-start gap-[10px] px-[14px] py-3 rounded-[10px] text-[13px] mb-[14px] ${profileAlert.type === 'success'
                       ? 'bg-[#f0fdf4] border border-[#bbf7d0] text-[#16a34a]'
                       : 'bg-[#fef2f2] border border-[#fecaca] text-[#dc2626]'
-                  }`}>
+                    }`}>
                     {profileAlert.type === 'success' ? <CheckCircle size={16} className="flex-shrink-0 mt-[1px]" /> : <AlertCircle size={16} className="flex-shrink-0 mt-[1px]" />}
                     <span>{profileAlert.msg}</span>
                   </div>
@@ -584,11 +583,10 @@ const AdminLayout = () => {
             {profileTab === 'password' && (
               <div className="p-6 bg-white">
                 {pwAlert.msg && (
-                  <div className={`flex items-start gap-[10px] px-[14px] py-3 rounded-[10px] text-[13px] mb-[14px] ${
-                    pwAlert.type === 'success'
+                  <div className={`flex items-start gap-[10px] px-[14px] py-3 rounded-[10px] text-[13px] mb-[14px] ${pwAlert.type === 'success'
                       ? 'bg-[#f0fdf4] border border-[#bbf7d0] text-[#16a34a]'
                       : 'bg-[#fef2f2] border border-[#fecaca] text-[#dc2626]'
-                  }`}>
+                    }`}>
                     {pwAlert.type === 'success' ? <CheckCircle size={16} className="flex-shrink-0 mt-[1px]" /> : <AlertCircle size={16} className="flex-shrink-0 mt-[1px]" />}
                     <span>{pwAlert.msg}</span>
                   </div>

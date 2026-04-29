@@ -19,6 +19,7 @@ import GovtJobs from "../pages/GovtJobs";
 // Lazy-loaded pages
 const JobDetail = lazy(() => import("../pages/JobDetail"));
 const Companies = lazy(() => import("../pages/Companies"));
+const CompanyDetail = lazy(() => import("../pages/CompanyDetail"));
 const CompanyJobs = lazy(() => import("../pages/CompanyJobs"));
 const UserLogin = lazy(() => import("../pages/UserLogin"));
 const Register = lazy(() => import("../pages/Register"));
@@ -44,6 +45,7 @@ const AdminEmployers = lazy(() => import("../pages/admin/AdminEmployers"));
 const AdminJobs = lazy(() => import("../pages/admin/AdminJobs"));
 const AdminJobCategories = lazy(() => import("../pages/admin/AdminJobCategories"));
 const AdminBlogCategories = lazy(() => import("../pages/admin/AdminBlogCategories"));
+const AdminBlog = lazy(() => import("../pages/admin/AdminBlogs"));
 const AdminSubAdmins = lazy(() => import("../pages/admin/AdminSubAdmins"));
 const AdminFeedback = lazy(() => import("../pages/admin/AdminFeedback"));
 const AdminEnquiries = lazy(() => import("../pages/admin/AdminEnquiries"));
@@ -58,6 +60,7 @@ const AppRoutes = () => {
         <Route path="/jobs" element={<Jobs />} />
         <Route path="/jobs/:id" element={<JobDetail />} />
         <Route path="/companies" element={<Companies />} />
+        <Route path="/companies/:id" element={<CompanyDetail />} />
         <Route path="/companies/:id/jobs" element={<CompanyJobs />} />
         <Route path="/about" element={<About />} />
         <Route path="/services" element={<Services />} />
@@ -113,6 +116,7 @@ const AppRoutes = () => {
           <Route path="/admin/jobs" element={<AdminJobs />} />
           <Route path="/admin/job-categories" element={<AdminJobCategories />} />
           <Route path="/admin/blog-categories" element={<AdminBlogCategories />} />
+          <Route path="/admin/blog" element={<AdminBlog />} />
           <Route path="/admin/sub-admins" element={<AdminSubAdmins />} />
           <Route path="/admin/feedback" element={<AdminFeedback />} />
           <Route path="/admin/enquiries" element={<AdminEnquiries />} />
