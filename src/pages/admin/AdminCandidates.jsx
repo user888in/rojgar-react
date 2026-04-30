@@ -16,7 +16,8 @@ import {
   AlertTriangle,
   X,
   ShieldAlert,
-  ChevronDown
+  ChevronDown,
+  UserCog
 } from "lucide-react";
 
 // Helper components
@@ -29,7 +30,7 @@ const StatCard = ({ title, value, subText, icon: Icon, colorClass, onClick, acti
   const cur = styles[colorClass];
 
   return (
-    <div 
+    <div
       onClick={onClick}
       style={{
         background: '#fff',
@@ -59,7 +60,7 @@ const StatCard = ({ title, value, subText, icon: Icon, colorClass, onClick, acti
       }}
     >
       {/* Bottom gradient bar */}
-      <div 
+      <div
         className="stat-card-bar"
         style={{
           position: 'absolute',
@@ -73,7 +74,7 @@ const StatCard = ({ title, value, subText, icon: Icon, colorClass, onClick, acti
           transform: 'scaleX(0)',
         }}
       />
-      
+
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div>
           <div style={{ fontSize: 12, color: '#64748b', marginBottom: 4 }}>{title}</div>
@@ -115,7 +116,7 @@ const getStatusPill = (status) => {
 };
 
 const AdminCandidates = () => {
-  const { user, authFetch } = useAuth();
+  const { getAuthHeaders, user, token, authFetch, login } = useAuth();
   const { onOpenProfile } = useOutletContext() || {};
   const isSubAdmin = user?.role === "SUB_ADMIN";
 
@@ -125,7 +126,7 @@ const AdminCandidates = () => {
   const [candidates, setCandidates] = useState([]);
   const [pagination, setPagination] = useState({ page: 0, size: 10, totalElements: 0, totalPages: 0 });
   const [filters, setFilters] = useState({ search: "", status: "", direction: "desc" });
-  
+
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [bulkLoading, setBulkLoading] = useState(false);
   const [rowBusy, setRowBusy] = useState({});
@@ -160,7 +161,7 @@ const AdminCandidates = () => {
       const dataAll = resAll.ok ? await resAll.json() : {};
       const dataAct = resActive.ok ? await resActive.json() : {};
       const dataSus = resSuspended.ok ? await resSuspended.json() : {};
-      
+
       setStats({
         total: dataAll.totalElements ?? '--',
         active: dataAct.totalElements ?? '--',
@@ -185,13 +186,13 @@ const AdminCandidates = () => {
       const res = await authFetch(`${API_BASE_URL}/admin/candidates?${params}`);
       if (!res.ok) throw new Error("Failed to fetch");
       const data = await res.json();
-      
+
       setCandidates(data.content || []);
       setPagination(p => ({ ...p, totalElements: data.totalElements || 0, totalPages: data.totalPages || 0 }));
 
       // Clean up selectedIds to only include visible/valid ones on this page if they changed status, 
       // though typically we clear on page change anyway.
-      
+
     } catch (err) {
       console.error(err);
       showToast("Failed to load candidates", "danger");
@@ -309,7 +310,60 @@ const AdminCandidates = () => {
   };
 
   const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A';
-  
+
+  // Impersonate
+  const impersonateCandidate = async (targetUserId) => {
+    if (!window.confirm("You will be logged in as this candidate. Continue?")) return;
+
+    setRowBusy(p => ({ ...p, [targetUserId]: true }));
+    try {
+      const res = await authFetch(`${API_BASE_URL}/auth/impersonate/${targetUserId}`, {
+        method: "POST"
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || "Impersonation failed.");
+      }
+
+      const data = await res.json();
+
+      sessionStorage.setItem("impersonation", JSON.stringify({
+        active: true,
+        targetUserId: data.userId,
+        targetUsername: data.username,
+        targetFullName: data.fullName || data.username,
+        targetEmail: data.email,
+        targetRole: data.role,
+        adminUsername: data.impersonatedBy,
+        adminUser: user
+      }));
+
+      // Update AuthContext to the impersonated user so ProtectedRoute allows access
+      const impersonatedUser = {
+        userId: data.userId || targetUserId,
+        id: data.userId || targetUserId,
+        username: data.username,
+        fullName: data.fullName || data.username,
+        email: data.email,
+        role: data.role || 'JOB_SEEKER'
+      };
+
+      login(data.token || token, impersonatedUser);
+
+      showToast(`Entering session as ${data.username}…`, "warning");
+
+      setTimeout(() => {
+        window.location.href = "/dashboard";
+      }, 900);
+
+    } catch (err) {
+      showToast(err.message || "Network error during impersonation.", "danger");
+    } finally {
+      setRowBusy(p => ({ ...p, [targetUserId]: false }));
+    }
+  };
+
   // Calculate indeterminate state
   const pageInactiveIds = getPageInactiveIds();
   const selectedOnPage = pageInactiveIds.filter(id => selectedIds.has(id)).length;
@@ -325,7 +379,7 @@ const AdminCandidates = () => {
 
   return (
     <div className="relative font-['DM_Sans',sans-serif] text-[#0f172a] max-w-[1600px] mx-auto min-h-screen">
-      
+
       {/* Spinner Overlay */}
       {initialLoad && (
         <div className="fixed inset-0 bg-white/70 z-[9999] flex items-center justify-center backdrop-blur-sm">
@@ -350,7 +404,7 @@ const AdminCandidates = () => {
           <span>candidate{selectedIds.size !== 1 ? 's' : ''} selected</span>
         </div>
         <div className="w-[1px] h-[28px] bg-white/10"></div>
-        <button 
+        <button
           onClick={bulkActivate} disabled={bulkLoading}
           className="inline-flex items-center gap-[7px] bg-[#0d9488] text-white border-none rounded-[10px] px-5 py-[9px] text-[13.5px] font-bold cursor-pointer transition-all hover:bg-[#0f766e] hover:-translate-y-[1px] hover:shadow-[0_6px_18px_rgba(13,148,136,0.4)] disabled:opacity-60 disabled:cursor-not-allowed whitespace-nowrap"
         >
@@ -460,7 +514,7 @@ const AdminCandidates = () => {
       <div className="bg-gradient-to-br from-[#0b2239] via-[#1a3a5c] to-[#0d4a4a] rounded-[14px] p-[28px_32px] mb-6 text-white relative overflow-hidden shadow-lg">
         <div className="absolute -top-[60px] -right-[40px] w-[220px] h-[220px] rounded-full bg-[radial-gradient(circle,rgba(13,148,136,0.25),transparent_70%)] pointer-events-none" />
         <div className="absolute -bottom-[80px] left-[30%] w-[180px] h-[180px] rounded-full bg-[radial-gradient(circle,rgba(20,184,166,0.1),transparent_70%)] pointer-events-none" />
-        
+
         <h4 className="font-extrabold text-[1.3rem] m-0 mb-1 relative flex items-center gap-2">
           <Users size={24} /> Candidates
         </h4>
@@ -471,18 +525,18 @@ const AdminCandidates = () => {
 
       {/* Stat Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <StatCard 
-          title="Total Candidates" value={stats.total} subText="Show all" icon={Users} colorClass="sky" 
+        <StatCard
+          title="Total Candidates" value={stats.total} subText="Show all" icon={Users} colorClass="sky"
           onClick={() => { setFilters(f => ({ ...f, status: "" })); clearSelection(); setPagination(p => ({ ...p, page: 0 })); }}
           activeFilter={filters.status === ""}
         />
-        <StatCard 
-          title="Active" value={stats.active} subText="Filter active" icon={CheckCircle2} colorClass="green" 
+        <StatCard
+          title="Active" value={stats.active} subText="Filter active" icon={CheckCircle2} colorClass="green"
           onClick={() => { setFilters(f => ({ ...f, status: "ACTIVE" })); clearSelection(); setPagination(p => ({ ...p, page: 0 })); }}
           activeFilter={filters.status === "ACTIVE"}
         />
-        <StatCard 
-          title="Suspend" value={stats.suspended} subText="Filter Suspend" icon={XCircle} colorClass="red" 
+        <StatCard
+          title="Suspend" value={stats.suspended} subText="Filter Suspend" icon={XCircle} colorClass="red"
           onClick={() => { setFilters(f => ({ ...f, status: "SUSPENDED" })); clearSelection(); setPagination(p => ({ ...p, page: 0 })); }}
           activeFilter={filters.status === "SUSPENDED"}
         />
@@ -490,26 +544,26 @@ const AdminCandidates = () => {
 
       {/* Table Card */}
       <div className="bg-white rounded-[14px] border border-[#e8ecf1] shadow-[0_4px_20px_rgba(11,34,57,0.08)] overflow-hidden">
-        
+
         {/* Header & Controls */}
         <div className="p-[16px_20px] border-b border-[#f1f5f9] flex justify-between items-center flex-wrap gap-3">
           <span className="text-[13.5px] font-bold text-[#0f172a] flex items-center gap-[7px]">
             <Users size={16} className="text-[#0d9488]" /> All Candidates
           </span>
-          
+
           <div className="flex items-center gap-[10px] flex-wrap">
             <div className="flex items-center gap-2 bg-[#f8fafc] border-[1.5px] border-[#e8ecf1] rounded-full px-[14px] py-[6px] focus-within:border-[#0d9488] transition-colors">
               <Search size={14} className="text-[#94a3b8] flex-shrink-0" />
-              <input 
-                type="text" 
-                placeholder="Search name, email…" 
+              <input
+                type="text"
+                placeholder="Search name, email…"
                 className="border-none outline-none bg-transparent text-[13px] w-[140px] md:w-[180px] text-[#0f172a] placeholder-[#aab]"
                 value={searchTerm}
                 onChange={(e) => { setSearchTerm(e.target.value); clearSelection(); setPagination(p => ({ ...p, page: 0 })); }}
               />
             </div>
-            
-            <select 
+
+            <select
               value={filters.status}
               onChange={(e) => { setFilters(f => ({ ...f, status: e.target.value })); clearSelection(); setPagination(p => ({ ...p, page: 0 })); }}
               className="text-[13px] border-[1.5px] border-[#e8ecf1] rounded-full px-[14px] py-[6px] bg-[#f8fafc] text-[#64748b] outline-none cursor-pointer focus:border-[#0d9488] transition-colors"
@@ -519,8 +573,8 @@ const AdminCandidates = () => {
               <option value="PENDING">Pending</option>
               <option value="SUSPENDED">Suspend</option>
             </select>
-            
-            <select 
+
+            <select
               value={filters.direction}
               onChange={(e) => { setFilters(f => ({ ...f, direction: e.target.value })); setPagination(p => ({ ...p, page: 0 })); }}
               className="text-[13px] border-[1.5px] border-[#e8ecf1] rounded-full px-[14px] py-[6px] bg-[#f8fafc] text-[#64748b] outline-none cursor-pointer focus:border-[#0d9488] transition-colors"
@@ -528,8 +582,8 @@ const AdminCandidates = () => {
               <option value="desc">Newest First</option>
               <option value="asc">Oldest First</option>
             </select>
-            
-            <select 
+
+            <select
               value={pagination.size}
               onChange={(e) => { setPagination(p => ({ ...p, size: Number(e.target.value), page: 0 })); clearSelection(); }}
               className="text-[13px] border-[1.5px] border-[#e8ecf1] rounded-full px-[14px] py-[6px] bg-[#f8fafc] text-[#64748b] outline-none cursor-pointer focus:border-[#0d9488] transition-colors"
@@ -548,17 +602,17 @@ const AdminCandidates = () => {
               <div className="w-8 h-8 border-2 border-[#0d9488] border-t-transparent rounded-full animate-spin"></div>
             </div>
           )}
-          
+
           <table className="w-full text-left border-collapse min-w-[900px]">
             <thead className="bg-[#f8fafc]">
               <tr>
                 <th className="p-[12px_12px_12px_16px] w-[40px]">
-                  <input 
-                    type="checkbox" 
+                  <input
+                    type="checkbox"
                     ref={selectAllRef}
                     checked={isAllSelected}
                     onChange={toggleAllSelection}
-                    className="w-[17px] h-[17px] accent-[#0d9488] cursor-pointer" 
+                    className="w-[17px] h-[17px] accent-[#0d9488] cursor-pointer"
                     title="Select all non-active on this page"
                   />
                 </th>
@@ -589,8 +643,8 @@ const AdminCandidates = () => {
                     <tr key={c.id} className={`hover:bg-[#f8fafc] border-b border-[#f1f5f9] last:border-0 transition-colors ${isChecked ? 'bg-[#0d9488]/5' : ''}`}>
                       <td className="p-[12px_12px_12px_16px] w-[40px]">
                         {!active ? (
-                          <input 
-                            type="checkbox" 
+                          <input
+                            type="checkbox"
                             checked={isChecked}
                             onChange={(e) => toggleRowSelection(c.id, e.target.checked)}
                             className="w-[17px] h-[17px] accent-[#0d9488] cursor-pointer"
@@ -612,19 +666,26 @@ const AdminCandidates = () => {
                       <td className="p-[12px_16px] text-[#94a3b8] text-[12.5px]">{formatDate(c.createdAt)}</td>
                       <td className="p-[12px_16px]">
                         <div className="flex gap-[6px] flex-wrap">
-                          <button 
+                          <button
                             disabled={active || rowBusy[c.id]}
                             onClick={() => activateCandidate(c.id)}
                             className="inline-flex items-center gap-1.5 px-[12px] py-[5px] rounded-lg text-[12px] font-semibold transition-all duration-200 border-[1.5px] text-[#16a34a] border-[#bbf7d0] bg-[#f0fdf4] hover:bg-[#16a34a] hover:text-white hover:border-[#16a34a] disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
                           >
                             <CheckCircle size={14} /> Activate
                           </button>
-                          <button 
+                          <button
                             disabled={!active || rowBusy[c.id]}
                             onClick={() => setSuspendModal({ isOpen: true, id: c.id, name: c.fullName || 'this candidate', reason: "", error: false, submitting: false })}
                             className="inline-flex items-center gap-1.5 px-[12px] py-[5px] rounded-lg text-[12px] font-semibold transition-all duration-200 border-[1.5px] text-[#d97706] border-[#fde68a] bg-[#fffbeb] hover:bg-[#d97706] hover:text-white hover:border-[#d97706] disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
                           >
                             <Ban size={14} /> Suspend
+                          </button>
+                          <button
+                            disabled={rowBusy[c.id]}
+                            onClick={() => impersonateCandidate(c.id)}
+                            className="inline-flex items-center gap-1.5 px-[12px] py-[5px] rounded-lg text-[12px] font-semibold transition-all duration-200 border-[1.5px] text-[#7c3aed] border-[#c4b5fd] bg-[#f5f3ff] hover:bg-[#7c3aed] hover:text-white hover:border-[#7c3aed] disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
+                          >
+                            {rowBusy[c.id] ? <div className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin"></div> : <UserCog size={14} />} View As
                           </button>
                         </div>
                       </td>
@@ -639,33 +700,32 @@ const AdminCandidates = () => {
         {/* Pagination */}
         <div className="p-[14px_20px] border-t border-[#f1f5f9] flex justify-between items-center flex-wrap gap-[10px]">
           <div className="text-[13px] text-[#64748b]">
-            {pagination.totalElements === 0 
-              ? "No results found" 
+            {pagination.totalElements === 0
+              ? "No results found"
               : `Showing ${pagination.page * pagination.size + 1}–${Math.min((pagination.page + 1) * pagination.size, pagination.totalElements)} of ${pagination.totalElements} candidates`}
           </div>
-          
+
           {pagination.totalPages > 1 && (
             <div className="flex gap-[4px]">
-              <button 
+              <button
                 onClick={() => handlePageChange(pagination.page - 1)}
                 disabled={pagination.page === 0}
                 className="w-[32px] h-[32px] rounded-lg border-[1.5px] border-[#e8ecf1] bg-[#f8fafc] text-[#64748b] flex items-center justify-center transition-all hover:border-[#0d9488] hover:text-[#0d9488] hover:bg-teal-50 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <ChevronLeft size={16} />
               </button>
-              
+
               {[...Array(pagination.totalPages)].map((_, i) => {
                 // simple window logic
                 if (i === 0 || i === pagination.totalPages - 1 || (i >= pagination.page - 1 && i <= pagination.page + 1)) {
                   return (
-                    <button 
+                    <button
                       key={i}
                       onClick={() => handlePageChange(i)}
-                      className={`w-[32px] h-[32px] rounded-lg border-[1.5px] text-[12.5px] font-semibold flex items-center justify-center transition-all ${
-                        i === pagination.page 
-                          ? 'bg-[#0d9488] border-[#0d9488] text-white' 
-                          : 'border-[#e8ecf1] bg-[#f8fafc] text-[#64748b] hover:border-[#0d9488] hover:text-[#0d9488] hover:bg-teal-50'
-                      }`}
+                      className={`w-[32px] h-[32px] rounded-lg border-[1.5px] text-[12.5px] font-semibold flex items-center justify-center transition-all ${i === pagination.page
+                        ? 'bg-[#0d9488] border-[#0d9488] text-white'
+                        : 'border-[#e8ecf1] bg-[#f8fafc] text-[#64748b] hover:border-[#0d9488] hover:text-[#0d9488] hover:bg-teal-50'
+                        }`}
                     >
                       {i + 1}
                     </button>
@@ -677,7 +737,7 @@ const AdminCandidates = () => {
                 return null;
               })}
 
-              <button 
+              <button
                 onClick={() => handlePageChange(pagination.page + 1)}
                 disabled={pagination.page >= pagination.totalPages - 1}
                 className="w-[32px] h-[32px] rounded-lg border-[1.5px] border-[#e8ecf1] bg-[#f8fafc] text-[#64748b] flex items-center justify-center transition-all hover:border-[#0d9488] hover:text-[#0d9488] hover:bg-teal-50 disabled:opacity-40 disabled:cursor-not-allowed"
@@ -699,15 +759,15 @@ const AdminCandidates = () => {
             </div>
             <div className="text-[1.2rem] font-bold text-[#091d33] mb-[10px]">Deactivate Candidate</div>
             <p className="text-[0.9rem] text-[#64748b] leading-[1.7] mb-[14px]">
-              Please provide a reason for deactivating <strong>{suspendModal.name}</strong>. 
+              Please provide a reason for deactivating <strong>{suspendModal.name}</strong>.
               This may be shared with the candidate.
             </p>
             <div className="mb-[20px]">
               <label className="block text-[11px] font-bold tracking-[.8px] uppercase text-[#94a3b8] mb-[8px]">
                 Reason for Deactivation
               </label>
-              <textarea 
-                rows="3" 
+              <textarea
+                rows="3"
                 placeholder="e.g. Violation of platform terms, fraudulent activity…"
                 value={suspendModal.reason}
                 onChange={(e) => setSuspendModal(p => ({ ...p, reason: e.target.value, error: false }))}
@@ -720,14 +780,14 @@ const AdminCandidates = () => {
               )}
             </div>
             <div className="flex justify-end gap-[10px]">
-              <button 
+              <button
                 onClick={() => setSuspendModal({ ...suspendModal, isOpen: false })}
                 disabled={suspendModal.submitting}
                 className="inline-flex items-center gap-[7px] border-none rounded-full px-[26px] py-[11px] text-[.88rem] font-bold cursor-pointer transition-all bg-[#f1f5f9] text-[#64748b] hover:bg-[#e2e8f0] disabled:opacity-60"
               >
                 Cancel
               </button>
-              <button 
+              <button
                 onClick={confirmSuspend}
                 disabled={suspendModal.submitting}
                 className="inline-flex items-center gap-[7px] border-none rounded-full px-[26px] py-[11px] text-[.88rem] font-bold cursor-pointer transition-all bg-[#ef4444] text-white hover:bg-[#dc2626] disabled:opacity-60"

@@ -578,9 +578,14 @@ export default function UserDashboard() {
         let imp = {}; try { imp = JSON.parse(sessionStorage.getItem('impersonation')); } catch {}
         if (!imp.active) return null;
         return (
-          <div className="fixed top-0 left-0 right-0 z-[10000] flex items-center justify-center gap-2 px-4 py-2 bg-[#dc2626] text-white text-[12.5px] font-bold shadow-lg">
-            <Lock size={14} />
-            <span>Viewing as <strong className="underline">{imp.targetUsername}</strong> — admin: <strong>{imp.adminUsername}</strong></span>
+          <div className="sticky top-0 z-[10000] flex items-center justify-center gap-4 px-4 py-2 bg-[#F49C0B] text-white text-[12.5px] font-bold shadow-lg">
+            <div className="flex items-center gap-2">
+              <Lock size={14} />
+              <span>Viewing as <strong className="underline">{imp.targetUsername}</strong> — admin: <strong>{imp.adminUsername}</strong></span>
+            </div>
+            <button onClick={logout} className="px-3 py-1 bg-white text-[#F49C0B] rounded text-xs font-bold hover:bg-[#fffbeb] transition-colors border-none cursor-pointer">
+              Exit
+            </button>
           </div>
         );
       })()}

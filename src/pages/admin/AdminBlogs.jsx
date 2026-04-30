@@ -26,6 +26,14 @@ import "react-quill-new/dist/quill.snow.css";
 import { useAuth } from "../../context/AuthContext";
 import { API_BASE_URL } from "../../config/api";
 
+// Helper to decode escaped HTML entities from backend
+const decodeHTML = (html) => {
+  if (!html) return "";
+  const txt = document.createElement("textarea");
+  txt.innerHTML = html;
+  return txt.value;
+};
+
 const AdminBlog = () => {
   const { authFetch, user } = useAuth();
   const { onOpenProfile } = useOutletContext() || {};
@@ -272,7 +280,6 @@ const AdminBlog = () => {
     setPendingImages([]);
     setExistingImages([]);
 
-    // Using a temp loading state for the form, though we already show it opens immediately
     try {
       const res = await authFetch(`${API_BASE_URL}/public/blogs/${id}`);
       if (!res.ok) throw new Error();
@@ -283,7 +290,7 @@ const AdminBlog = () => {
         slug: b.slug || "",
         categoryId: b.categoryId || "",
         status: b.status || "DRAFT",
-        description: b.description || "",
+        description: decodeHTML(b.description) || "",
         metaTitle: b.metaTitle || "",
         metaDescription: b.metaDescription || "",
         metaKeywords: b.metaKeywords || "",
@@ -509,18 +516,7 @@ const AdminBlog = () => {
   return (
     <div className="font-['DM_Sans',sans-serif] text-[#0f172a] relative min-h-[80vh]">
       {/* Topbar */}
-      <div
-        className="sticky top-0 z-[100] bg-white px-8 py-4 mb-6 shadow-[0_2px_8px_rgba(0,0,0,0.06)] border-b border-[#e8ecf1]"
-        style={{
-          marginLeft: "-32px",
-          marginRight: "-32px",
-          marginTop: "-32px",
-          paddingLeft: "32px",
-          paddingRight: "32px",
-          paddingTop: "16px",
-          paddingBottom: "16px",
-        }}
-      >
+      <div className="sticky top-0 z-[100] bg-white -mx-8 -mt-8 px-8 py-4 mb-6 shadow-[0_2px_8px_rgba(0,0,0,0.06)] border-b border-[#e8ecf1]">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
             <p className="text-[20px] font-extrabold text-[#0f172a] m-0 leading-tight">
@@ -1428,7 +1424,7 @@ const AdminBlog = () => {
                   <div
                     className="bg-[#f8fafc] border border-[#e8ecf1] rounded-[10px] p-[16px] text-[13.5px] leading-[1.7] text-[#0f172a] max-h-[280px] overflow-y-auto [&_ul]:pl-[20px] [&_h1]:text-lg [&_h1]:font-bold [&_h2]:text-md [&_h2]:font-bold"
                     dangerouslySetInnerHTML={{
-                      __html: viewModal.data.description || "—",
+                      __html: decodeHTML(viewModal.data.description) || "—",
                     }}
                   />
 

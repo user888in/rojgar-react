@@ -46,12 +46,20 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const logout = useCallback(async () => {
+    let imp = null;
+    try {
+      const impStr = sessionStorage.getItem('impersonation');
+      if (impStr) {
+        imp = JSON.parse(impStr);
+      }
+    } catch { }
+
     try {
       // Call server-side logout to clear session cookies
       await fetch(`${API_BASE_URL}/auth/logout`, {
         method: 'POST',
         credentials: 'include',
-      }).catch(() => {}); // Ignore errors
+      }).catch(() => { }); // Ignore errors
     } catch (error) {
       // Silently ignore logout API errors
     }
@@ -61,6 +69,13 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem(USER_KEY);
     setToken(null);
     setUser(null);
+
+    if (imp && imp.active) {
+      sessionStorage.removeItem('impersonation');
+      window.location.href = '/admin/login';
+      return;
+    }
+
     window.dispatchEvent(new Event('authChange'));
   }, []);
 

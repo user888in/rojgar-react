@@ -13,7 +13,8 @@ import {
 //  CONSTANTS
 
 const PASSWORD_PATTERN = /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!])(?=\S+$).{8,20}$/;
-const USERNAME_PATTERN = /^[a-zA-Z0-9_]+$/;
+const USERNAME_PATTERN = /^[a-zA-Z0-9._-]+$/;
+const COMPANY_NAME_PATTERN = /^[a-zA-Z0-9 .,&'\-]+$/;
 
 const STRENGTH_LEVELS = [
   { pct: "25%",  color: "#ef4444", label: "Weak"   },
@@ -218,6 +219,8 @@ const RecruiterRegister = () => {
   const [form, setForm] = useState({
     recruiterName: "", username: "", email: "", phone: "",
     companyName: "", companyDescription: "",
+    companyType: "", companySize: "", foundedYear: "",
+    industry: "", headquarters: "", websiteUrl: "",
   });
   const [password,        setPassword]        = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -228,6 +231,11 @@ const RecruiterRegister = () => {
   const [logoFile,        setLogoFile]        = useState(null);
   const [logoPreview,     setLogoPreview]     = useState(null);
   const [dragOver,        setDragOver]        = useState(false);
+
+  // Enums
+  const [companyTypes, setCompanyTypes] = useState([]);
+  const [companySizes, setCompanySizes] = useState([]);
+  const [enumsLoading, setEnumsLoading] = useState(true);
 
   // Existing company search
   const [searchQuery,      setSearchQuery]      = useState("");
@@ -263,13 +271,37 @@ const RecruiterRegister = () => {
   }, []);
   const dismissToast = (id) => setToasts(prev => prev.filter(t => t.id !== id));
 
-  // ── Load security questions ─────────────────────────────
+  // ── Load enums & security questions ─────────────────────
   useEffect(() => {
+    // Security Questions
     fetch(`${API_BASE_URL}/auth/security-questions`)
       .then(r => r.ok ? r.json() : [])
       .then(data => setQuestions(Array.isArray(data) ? data : (data.content || [])))
-      .catch(() => showToast("Could not load security questions. Please refresh.", "danger"));
-  }, []);
+      .catch(() => showToast("Could not load security questions.", "danger"));
+
+    // Company Enums
+    const loadEnums = async () => {
+      try {
+        const [typeRes, sizeRes] = await Promise.all([
+          fetch(`${API_BASE_URL}/companies/company-type`),
+          fetch(`${API_BASE_URL}/companies/enums/company-size`),
+        ]);
+        if (typeRes.ok) {
+          const data = await typeRes.json();
+          setCompanyTypes(data.map(obj => ({ value: obj.value, label: obj.label || obj.value })));
+        }
+        if (sizeRes.ok) {
+          const data = await sizeRes.json();
+          setCompanySizes(data.map(obj => ({ value: obj.value, label: obj.label || obj.value })));
+        }
+      } catch (err) {
+        console.error("Enum load error", err);
+      } finally {
+        setEnumsLoading(false);
+      }
+    };
+    loadEnums();
+  }, [showToast]);
 
   // ── Close search dropdown on outside click ──────────────
   useEffect(() => {
@@ -418,7 +450,22 @@ const RecruiterRegister = () => {
     if (!/^\d{10}$/.test(form.phone))     fe.phone = "Phone number must be exactly 10 digits.";
     if (!PASSWORD_PATTERN.test(password))  fe.password = "8–20 chars, include uppercase, lowercase, number & special character.";
     if (password !== confirmPassword)      fe.confirmPassword = "Passwords do not match.";
-    if (companyMode === "new" && !form.companyName.trim()) fe.companyName = "Company name is required.";
+
+    if (companyMode === "new") {
+      if (!form.companyName.trim()) {
+        fe.companyName = "Company name is required.";
+      } else if (!COMPANY_NAME_PATTERN.test(form.companyName)) {
+        fe.companyName = "Company name can only contain letters, numbers, spaces and . , & ' -";
+      } else if (form.companyName.length < 2 || form.companyName.length > 500) {
+        fe.companyName = "Company name must be 2–500 characters.";
+      }
+      
+      if (!form.companyType)        fe.companyType = "Company type is required.";
+      if (!form.companySize)        fe.companySize = "Company size is required.";
+      if (!form.foundedYear)        fe.foundedYear = "Founded year is required.";
+      else if (parseInt(form.foundedYear) < 1800 || parseInt(form.foundedYear) > 2100) fe.foundedYear = "Enter valid year (1800-2100).";
+    }
+
     if (companyMode === "existing" && !selectedCompany)    fe.companySearch = "Please select your company from search results.";
 
     const se = secPairs.map(p => {
@@ -454,38 +501,38 @@ const RecruiterRegister = () => {
     }));
 
     try {
-      let response;
+      const recruiterData = {
+        fullname:    form.recruiterName.trim(),
+        username:    form.username.trim(),
+        email,
+        phone:       Number(form.phone.trim()),
+        password,
+        company:     companyMode === "existing" 
+          ? { existingCompanyId: Number(selectedCompany.id) }
+          : { 
+              newCompany: {
+                companyName:  form.companyName.trim(),
+                companyType:  form.companyType,
+                companySize:  form.companySize,
+                foundedYear:  parseInt(form.foundedYear, 10),
+                description:  form.companyDescription.trim() || undefined,
+                industry:     form.industry.trim() || undefined,
+                headquarters: form.headquarters.trim() || undefined,
+                websiteUrl:   form.websiteUrl.trim() || undefined,
+              }
+            },
+        securityQuestions,
+      };
 
+      let response;
       if (companyMode === "existing") {
-        // JSON — no logo
-        const payload = {
-          fullname:          form.recruiterName.trim(),
-          username:          form.username.trim(),
-          email,
-          phone:             form.phone.trim(),
-          password,
-          existingCompanyId: Number(selectedCompany.id),
-          securityQuestions,
-        };
         response = await fetch(`${API_BASE_URL}/auth/recruiter`, {
           method:      "POST",
           headers:     { "Content-Type": "application/json" },
           credentials: "include",
-          body:        JSON.stringify(payload),
+          body:        JSON.stringify(recruiterData),
         });
-
       } else {
-        // multipart/form-data — may include logo
-        const recruiterData = {
-          fullname:    form.recruiterName.trim(),
-          username:    form.username.trim(),
-          email,
-          phone:       form.phone.trim(),
-          password,
-          companyName: form.companyName.trim(),
-          description: form.companyDescription.trim(),
-          securityQuestions,
-        };
         const fd = new FormData();
         fd.append("data", new Blob([JSON.stringify(recruiterData)], { type: "application/json" }));
         if (logoFile) fd.append("logo", logoFile, logoFile.name);
@@ -494,7 +541,6 @@ const RecruiterRegister = () => {
           method:      "POST",
           credentials: "include",
           body:        fd,
-          // ⚠ Do NOT set Content-Type — browser sets it with boundary
         });
       }
 
@@ -511,7 +557,7 @@ const RecruiterRegister = () => {
         );
       }
     } catch {
-      showToast("Network error. Please check your connection and try again.", "danger");
+      showToast("Network error. Please try again.", "danger");
     } finally {
       setLoading(false);
     }
@@ -547,46 +593,41 @@ const RecruiterRegister = () => {
         {/* LEFT PANEL  */}
         <div className="hidden lg:flex w-[42%] xl:w-[40%] bg-[#091d33] flex-col justify-start px-12 py-12 relative overflow-hidden sticky top-0 h-screen">
 
-          {/* Amber rings */}
           <div className="absolute w-[380px] h-[380px] rounded-full border border-[#f59e0b]/[0.12] -top-20 -right-24 pointer-events-none" />
           <div className="absolute w-[220px] h-[220px] rounded-full bg-[#f59e0b]/[0.05] -bottom-10 -left-14 pointer-events-none" />
 
           <div className="relative z-10">
-            {/* Logo + badge same row */}
             <div className="flex items-center gap-1 mb-8">
-              <a href="/recruiter" className="flex-shrink-0">
+              <Link to="/" className="flex-shrink-0">
                 <img src={rojgar_shine_logo} alt="RojgarShine" className="h-[70px] w-auto object-contain" />
-              </a>
+              </Link>
               <div className="inline-flex mt-6 items-center gap-1.5 bg-[#f59e0b]/[0.12] border border-[#f59e0b]/25 rounded-full px-3.5 py-1.5">
                 <Building2 size={14} className="text-[#f59e0b] flex-shrink-0" />
                 <span className="text-[11px] font-bold text-[#f59e0b] uppercase tracking-[0.8px] whitespace-nowrap">Recruiter Portal</span>
               </div>
             </div>
 
-            {/* Headline — amber em */}
-            <h1 className="text-white  leading-[1.18] tracking-tight mb-5 ps-12 text-3xl" >
+            <h1 className="text-white leading-[1.18] tracking-tight mb-5 ps-12 text-3xl font-bold" >
               Start hiring<br />
               <em className="not-italic text-[#f59e0b]">top talent</em><br />
               today.
             </h1>
 
-            {/* Sub */}
-            <p className="text-white/45 text-[14px] leading-[1.75] max-w-[320px] mb-5 ps-12">
+            <p className="text-white/45 text-[14px] leading-[1.75] max-w-[320px] mb-8 ps-12">
               Register your company and get instant access to thousands of verified candidates across India.
             </p>
 
-            {/* Steps — amber step numbers */}
-            <div className="flex flex-col gap-1 ps-12">
+            <div className="flex flex-col gap-6 ps-12">
               {[
                 { n: "1", title: "Create your recruiter account", desc: "Fill in your company and personal details" },
                 { n: "2", title: "Post job openings",             desc: "Publish unlimited listings in minutes"      },
                 { n: "3", title: "Review & hire candidates",      desc: "Manage applicants from your dashboard"      },
               ].map(({ n, title, desc }) => (
-                <div key={n} className="flex items-start gap-3.5">
-                  <div className="flex-shrink-0 w-[30px] h-[30px] rounded-full bg-[#f59e0b]/[0.12] border border-[#f59e0b]/28 flex items-center justify-center text-[#f59e0b] text-[12px] font-bold mt-0.5">{n}</div>
+                <div key={n} className="flex items-start gap-4">
+                  <div className="flex-shrink-0 w-[32px] h-[32px] rounded-full bg-[#f59e0b]/[0.12] border border-[#f59e0b]/28 flex items-center justify-center text-[#f59e0b] text-[13px] font-bold mt-0.5">{n}</div>
                   <div>
-                    <div className="text-white/82 text-[13px] font-semibold leading-tight mb-0.5">{title}</div>
-                    <div className="text-white/35 text-[12px] leading-[1.5]">{desc}</div>
+                    <div className="text-white/90 text-[14px] font-semibold mb-0.5">{title}</div>
+                    <div className="text-white/40 text-[12px] leading-[1.5]">{desc}</div>
                   </div>
                 </div>
               ))}
@@ -602,7 +643,6 @@ const RecruiterRegister = () => {
               <SuccessPanel email={regEmail} onResend={handleResend} />
             ) : (
               <>
-                {/* Eyebrow */}
                 <div className="text-[11px] font-bold tracking-[2px] uppercase text-[#f59e0b] mb-2.5">
                   Company Registration
                 </div>
@@ -616,41 +656,31 @@ const RecruiterRegister = () => {
                 <form onSubmit={handleSubmit} autoComplete="off" noValidate encType="multipart/form-data">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-5">
 
-                    {/* ── PERSONAL INFO ── */}
                     <SectionLabel>Personal info</SectionLabel>
 
-                    {/* Full Name */}
                     <Field label="Full Name" icon={<User size={14} />} error={fieldErrors.recruiterName}>
                       <input type="text" name="recruiterName" value={form.recruiterName} onChange={handleFullName}
-                        placeholder="Recruiter Full Name" required autoComplete="name"
-                        className={inputCls(fieldErrors.recruiterName)} />
+                        placeholder="Recruiter Full Name" required className={inputCls(fieldErrors.recruiterName)} />
                     </Field>
 
-                    {/* Username */}
                     <Field label="Username" icon={<AtSign size={14} />} error={fieldErrors.username}>
                       <input type="text" name="username" value={form.username} onChange={handleUsername}
-                        placeholder="Username" required autoComplete="username"
-                        className={inputCls(fieldErrors.username)} />
+                        placeholder="Username" required className={inputCls(fieldErrors.username)} />
                     </Field>
 
-                    {/* Email */}
                     <Field label="Official Work Email" icon={<Mail size={14} />} error={fieldErrors.email}>
                       <input type="email" name="email" value={form.email} onChange={handleChange}
-                        placeholder="hr@company.com" required autoComplete="email"
-                        className={inputCls(fieldErrors.email)} />
+                        placeholder="hr@company.com" required className={inputCls(fieldErrors.email)} />
                     </Field>
 
-                    {/* Phone */}
                     <Field label="Phone Number" icon={<Phone size={14} />} error={fieldErrors.phone}>
                       <input type="tel" name="phone" value={form.phone} onChange={handlePhone}
-                        placeholder="Mobile Number" required autoComplete="tel" inputMode="numeric" maxLength={10}
+                        placeholder="Mobile Number" required inputMode="numeric" maxLength={10}
                         className={inputCls(fieldErrors.phone)} />
                     </Field>
 
-                    {/* ── COMPANY INFO ── */}
                     <SectionLabel>Company info</SectionLabel>
 
-                    {/* Company mode toggle — spans full width */}
                     <div className="col-span-2 flex bg-[#f1f5f9] rounded-[10px] p-1 gap-1 mb-1">
                       {[
                         { mode: "new",      icon: <BuildingIcon size={13} />, label: "Register new company" },
@@ -668,17 +698,51 @@ const RecruiterRegister = () => {
                       ))}
                     </div>
 
-                    {/* NEW COMPANY fields */}
                     {companyMode === "new" && (
                       <>
-                        {/* Company Name */}
-                        <Field label="Company Name" icon={<Building2 size={14} />} error={fieldErrors.companyName}>
+                        <Field label="Company Name" icon={<Building2 size={14} />} error={fieldErrors.companyName} full>
                           <input type="text" name="companyName" value={form.companyName} onChange={handleChange}
-                            placeholder="Company Name"
-                            className={inputCls(fieldErrors.companyName)} />
+                            placeholder="e.g. Acme Technologies Pvt Ltd" className={inputCls(fieldErrors.companyName)} />
                         </Field>
 
-                        {/* Logo upload */}
+                        <Field label="Company Type" icon={<Building2 size={14} />} error={fieldErrors.companyType}>
+                          <select name="companyType" value={form.companyType} onChange={handleChange}
+                            className={inputCls(fieldErrors.companyType, "appearance-none")}>
+                            <option value="">{enumsLoading ? "Loading…" : "— Select type —"}</option>
+                            {companyTypes.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                          </select>
+                          <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#94a3b8] pointer-events-none" />
+                        </Field>
+
+                        <Field label="Company Size" icon={<User size={14} />} error={fieldErrors.companySize}>
+                          <select name="companySize" value={form.companySize} onChange={handleChange}
+                            className={inputCls(fieldErrors.companySize, "appearance-none")}>
+                            <option value="">{enumsLoading ? "Loading…" : "— Select size —"}</option>
+                            {companySizes.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+                          </select>
+                          <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#94a3b8] pointer-events-none" />
+                        </Field>
+
+                        <Field label="Founded Year" icon={<AtSign size={14} />} error={fieldErrors.foundedYear}>
+                          <input type="number" name="foundedYear" value={form.foundedYear} onChange={handleChange}
+                            placeholder="e.g. 2015" min="1800" max="2100" className={inputCls(fieldErrors.foundedYear)} />
+                        </Field>
+
+                        <Field label="Industry" icon={<Building2 size={14} />} error={fieldErrors.industry}>
+                          <input type="text" name="industry" value={form.industry} onChange={handleChange}
+                            placeholder="e.g. IT Services" className={inputCls(fieldErrors.industry)} />
+                        </Field>
+
+                        <Field label="Headquarters" icon={<Mail size={14} />} error={fieldErrors.headquarters}>
+                          <input type="text" name="headquarters" value={form.headquarters} onChange={handleChange}
+                            placeholder="e.g. Delhi, India" className={inputCls(fieldErrors.headquarters)} />
+                        </Field>
+
+                        <Field label="Website URL" icon={<AtSign size={14} />} error={fieldErrors.websiteUrl}>
+                          <input type="url" name="websiteUrl" value={form.websiteUrl} onChange={handleChange}
+                            placeholder="https://company.com" className={inputCls(fieldErrors.websiteUrl)} />
+                        </Field>
+
                         <div className="flex flex-col gap-[7px]">
                           <label className="text-[12px] font-medium text-[#091d33] tracking-[0.3px]">
                             Company Logo <span className="text-[#94a3b8] font-normal">(optional)</span>
@@ -698,20 +762,16 @@ const RecruiterRegister = () => {
                           >
                             <input type="file" id="companyLogo" accept="image/*" className="hidden"
                               onChange={(e) => handleLogoFile(e.target.files[0])} />
-
-                            {/* Preview circle */}
                             <div className="w-10 h-10 rounded-[10px] border border-[#e2e8f0] bg-white flex items-center justify-center overflow-hidden flex-shrink-0">
                               {logoPreview
                                 ? <img src={logoPreview} alt="Logo" className="max-w-full max-h-full object-contain" />
                                 : <Image size={20} className="text-[#cbd5e1]" />
                               }
                             </div>
-
                             <div className="flex-1 min-w-0">
                               <div className="text-[13px] font-semibold text-[#334155]">Click to upload logo</div>
                               <div className="text-[11px] text-[#94a3b8]">PNG, JPG, SVG · max 2 MB</div>
                             </div>
-
                             {logoPreview && (
                               <button type="button" onClick={(e) => { e.stopPropagation(); removeLogo(); }}
                                 className="ml-auto bg-transparent border-none text-[#94a3b8] hover:text-red-500 transition-colors p-1 cursor-pointer">
@@ -721,14 +781,12 @@ const RecruiterRegister = () => {
                           </div>
                         </div>
 
-                        {/* Description — full width */}
                         <div className="col-span-2 flex flex-col gap-[7px]">
                           <label className="text-[12px] font-medium text-[#091d33] tracking-[0.3px]">Company Description</label>
                           <div className="relative">
                             <span className="absolute left-[13px] top-[14px] text-[#94a3b8] pointer-events-none"><MessageSquare size={14} /></span>
                             <textarea name="companyDescription" value={form.companyDescription} onChange={handleChange}
-                              placeholder="Brief description of your company, what you do, and your culture..."
-                              rows={3}
+                              placeholder="Brief description of your company culture and mission..." rows={3}
                               className="w-full border-[1.5px] border-[rgba(9,29,51,0.12)] rounded-xl pl-10 pr-4 py-3 text-[14px] text-[#091d33] bg-[#f1f5f9] placeholder-[#b0bac6] outline-none focus:border-[#f59e0b] focus:bg-white focus:shadow-[0_0_0_3px_rgba(245,158,11,0.10)] transition-all resize-none"
                             />
                           </div>
@@ -736,32 +794,24 @@ const RecruiterRegister = () => {
                       </>
                     )}
 
-                    {/* EXISTING COMPANY search */}
                     {companyMode === "existing" && (
                       <div className="col-span-2 flex flex-col gap-[7px]">
                         <label className="text-[12px] font-medium text-[#091d33] tracking-[0.3px]">Search your company</label>
                         <div className="relative" ref={searchWrapRef}>
                           <span className="absolute left-[13px] top-1/2 -translate-y-1/2 text-[#94a3b8] pointer-events-none z-10"><Search size={14} /></span>
-                          <input
-                            type="text" value={searchQuery} onChange={handleSearchInput}
+                          <input type="text" value={searchQuery} onChange={handleSearchInput}
                             placeholder="Type company name to search…" autoComplete="off"
-                            className="w-full h-[48px] border-[1.5px] border-[rgba(9,29,51,0.12)] rounded-xl pl-10 pr-4 text-[14px] text-[#091d33] bg-[#f1f5f9] placeholder-[#b0bac6] outline-none focus:border-[#f59e0b] focus:bg-white focus:shadow-[0_0_0_3px_rgba(245,158,11,0.10)] transition-all"
-                          />
-
-                          {/* Dropdown */}
+                            className="w-full h-[48px] border-[1.5px] border-[rgba(9,29,51,0.12)] rounded-xl pl-10 pr-4 text-[14px] text-[#091d33] bg-[#f1f5f9] placeholder-[#b0bac6] outline-none focus:border-[#f59e0b] focus:bg-white focus:shadow-[0_0_0_3px_rgba(245,158,11,0.10)] transition-all" />
                           {dropdownOpen && (
                             <div className="absolute top-[calc(100%+6px)] left-0 right-0 bg-white border border-[#e2e8f0] rounded-[10px] shadow-[0_8px_24px_rgba(0,0,0,0.10)] z-[200] max-h-[220px] overflow-y-auto">
                               {searchLoading ? (
-                                <div className="p-3 flex justify-center">
-                                  <span className="w-5 h-5 border-2 border-[#94a3b8] border-t-transparent rounded-full animate-spin" />
-                                </div>
+                                <div className="p-3 flex justify-center"><span className="w-5 h-5 border-2 border-[#94a3b8] border-t-transparent rounded-full animate-spin" /></div>
                               ) : searchResults.length === 0 ? (
                                 <div className="p-3.5 text-center text-[13px] text-[#94a3b8]">No companies found</div>
                               ) : searchResults.map(c => (
-                                <div key={c.id} onClick={() => selectCompany(c)}
-                                  className="flex items-center gap-2.5 px-3.5 py-2.5 cursor-pointer hover:bg-[#f8fafc] border-b border-[#f1f5f9] last:border-b-0 transition-colors">
+                                <div key={c.id} onClick={() => selectCompany(c)} className="flex items-center gap-2.5 px-3.5 py-2.5 cursor-pointer hover:bg-[#f8fafc] border-b border-[#f1f5f9] last:border-b-0 transition-colors">
                                   {c.companyLogo
-                                    ? <img src={c.companyLogo} alt={c.companyName} className="w-8 h-8 rounded-md object-contain border border-[#e2e8f0] bg-[#f8fafc] flex-shrink-0" onError={(e) => { e.target.style.display = "none"; }} />
+                                    ? <img src={c.companyLogo} alt={c.companyName} className="w-8 h-8 rounded-md object-contain border border-[#e2e8f0] bg-[#f8fafc] flex-shrink-0" />
                                     : <div className="w-8 h-8 rounded-md bg-[#e6f7f6] text-[#18a99c] text-[11px] font-bold flex items-center justify-center flex-shrink-0">{getInitials(c.companyName)}</div>
                                   }
                                   <div>
@@ -773,8 +823,6 @@ const RecruiterRegister = () => {
                             </div>
                           )}
                         </div>
-
-                        {/* Selected company chip */}
                         {selectedCompany && (
                           <div className="flex items-center gap-2.5 px-3.5 py-2.5 bg-[#f0fdf4] border border-[#bbf7d0] rounded-[10px] mt-2">
                             {selectedCompany.logoUrl
@@ -782,20 +830,15 @@ const RecruiterRegister = () => {
                               : <div className="w-9 h-9 rounded-[7px] bg-[#e6f7f6] text-[#18a99c] text-[12px] font-bold flex items-center justify-center flex-shrink-0">{getInitials(selectedCompany.name)}</div>
                             }
                             <span className="flex-1 text-[13px] font-semibold text-[#065f46]">{selectedCompany.name}</span>
-                            <button type="button" onClick={clearSelectedCompany}
-                              className="bg-transparent border-none text-[#6b7280] hover:text-red-500 cursor-pointer p-1 rounded text-base leading-none transition-colors">
-                              <X size={16} />
-                            </button>
+                            <button type="button" onClick={clearSelectedCompany} className="bg-transparent border-none text-[#6b7280] hover:text-red-500 cursor-pointer p-1 rounded text-base leading-none transition-colors"><X size={16} /></button>
                           </div>
                         )}
                         {fieldErrors.companySearch && <span className="text-[11px] text-red-500 mt-0.5">{fieldErrors.companySearch}</span>}
                       </div>
                     )}
 
-                    {/* ── SECURITY QUESTIONS ── */}
                     <SectionLabel>Security questions</SectionLabel>
 
-                    {/* Account recovery sub-divider */}
                     <div className="col-span-2 flex items-center gap-2.5 mt-2 mb-1">
                       <Shield size={12} className="text-[#94a3b8] flex-shrink-0" />
                       <span className="text-[11px] font-semibold uppercase tracking-[1.5px] text-[#94a3b8] whitespace-nowrap">Account recovery</span>
@@ -803,33 +846,17 @@ const RecruiterRegister = () => {
                     </div>
 
                     {secPairs.map((pair, idx) => (
-                      <SecurityPair
-                        key={idx} num={idx + 1}
-                        questions={questions}
-                        selectedIds={selectedQuestionIds}
-                        value={pair.questionId}
-                        answer={pair.answer}
-                        onQuestionChange={(e) => updateSecPair(idx, "questionId", e.target.value)}
-                        onAnswerChange={(e)   => updateSecPair(idx, "answer",     e.target.value)}
-                        errors={secErrors[idx]}
-                      />
+                      <SecurityPair key={idx} num={idx + 1} questions={questions} selectedIds={selectedQuestionIds} value={pair.questionId} answer={pair.answer} onQuestionChange={(e) => updateSecPair(idx, "questionId", e.target.value)} onAnswerChange={(e)   => updateSecPair(idx, "answer",     e.target.value)} errors={secErrors[idx]} />
                     ))}
 
-                    {/* ── SET PASSWORD ── */}
                     <SectionLabel>Set password</SectionLabel>
 
-                    {/* Password */}
                     <div className="flex flex-col gap-[7px]">
                       <label className="text-[12px] font-medium text-[#091d33] tracking-[0.3px]">Password</label>
                       <div className="relative">
                         <span className="absolute left-[13px] top-1/2 -translate-y-1/2 text-[#94a3b8] pointer-events-none z-10"><Lock size={14} /></span>
-                        <input
-                          type={showPwd ? "text" : "password"} value={password} onChange={handlePassword}
-                          placeholder="Min. 8 characters" required autoComplete="new-password"
-                          className={inputCls(fieldErrors.password, "pr-11")}
-                        />
-                        <button type="button" onClick={() => setShowPwd(v => !v)} tabIndex={-1}
-                          className="absolute right-[14px] top-1/2 -translate-y-1/2 text-[#94a3b8] hover:text-[#091d33] transition-colors p-1 flex items-center">
+                        <input type={showPwd ? "text" : "password"} value={password} onChange={handlePassword} placeholder="Min. 8 characters" required className={inputCls(fieldErrors.password, "pr-11")} />
+                        <button type="button" onClick={() => setShowPwd(v => !v)} tabIndex={-1} className="absolute right-[14px] top-1/2 -translate-y-1/2 text-[#94a3b8] hover:text-[#091d33] transition-colors p-1 flex items-center">
                           {showPwd ? <Eye size={16} /> : <EyeOff size={16} />}
                         </button>
                       </div>
@@ -844,53 +871,34 @@ const RecruiterRegister = () => {
                       {fieldErrors.password && <span className="text-[11px] text-red-500 mt-0.5">{fieldErrors.password}</span>}
                     </div>
 
-                    {/* Confirm Password */}
                     <div className="flex flex-col gap-[7px]">
                       <label className="text-[12px] font-medium text-[#091d33] tracking-[0.3px]">Confirm Password</label>
                       <div className="relative">
                         <span className="absolute left-[13px] top-1/2 -translate-y-1/2 text-[#94a3b8] pointer-events-none z-10"><Lock size={14} strokeWidth={2.5} /></span>
-                        <input
-                          type={showConfirm ? "text" : "password"} value={confirmPassword} onChange={handleConfirm}
-                          placeholder="Repeat password" required autoComplete="new-password"
-                          className={inputCls(fieldErrors.confirmPassword, "pr-11")}
-                        />
-                        <button type="button" onClick={() => setShowConfirm(v => !v)} tabIndex={-1}
-                          className="absolute right-[14px] top-1/2 -translate-y-1/2 text-[#94a3b8] hover:text-[#091d33] transition-colors p-1 flex items-center">
+                        <input type={showConfirm ? "text" : "password"} value={confirmPassword} onChange={handleConfirm} placeholder="Repeat password" required className={inputCls(fieldErrors.confirmPassword, "pr-11")} />
+                        <button type="button" onClick={() => setShowConfirm(v => !v)} tabIndex={-1} className="absolute right-[14px] top-1/2 -translate-y-1/2 text-[#94a3b8] hover:text-[#091d33] transition-colors p-1 flex items-center">
                           {showConfirm ? <Eye size={16} /> : <EyeOff size={16} />}
                         </button>
                       </div>
                       {fieldErrors.confirmPassword && <span className="text-[11px] text-red-500 mt-0.5">{fieldErrors.confirmPassword}</span>}
                     </div>
 
-                  </div>{/* /grid */}
-
-                  {/* Submit */}
-                  <button type="submit" disabled={loading}
-                    className="w-full h-[50px] bg-[#091d33] text-white border-0 rounded-xl text-[15px] font-semibold flex items-center justify-center gap-2 hover:bg-[#d97706] hover:-translate-y-px active:translate-y-0 transition-all disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer mt-5 mb-5"
-                  >
-                    {loading ? (
-                      <><span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /> Creating account…</>
-                    ) : (
-                      <><UserPlus size={16} /> Register as Recruiter</>
-                    )}
-                  </button>
-
-                  {/* login-row */}
-                  <div className="text-center text-[14px] text-[#64748b]">
-                    Already have an account?{" "}
-                    <Link to="/recruiter/login" className="text-[#091d33] font-semibold border-b-2 border-[#f59e0b] pb-px hover:text-[#d97706] transition-colors">
-                      Sign in →
-                    </Link>
                   </div>
 
+                  <button type="submit" disabled={loading} className="w-full h-[50px] bg-[#091d33] text-white border-0 rounded-xl text-[15px] font-semibold flex items-center justify-center gap-2 hover:bg-[#d97706] hover:-translate-y-px active:translate-y-0 transition-all disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer mt-8 mb-6">
+                    {loading ? <><span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /> Creating account…</> : <><UserPlus size={16} /> Register as Recruiter</>}
+                  </button>
+
+                  <div className="text-center text-[14px] text-[#64748b]">
+                    Already have an account?{" "}
+                    <Link to="/recruiter/login" className="text-[#091d33] font-semibold border-b-2 border-[#f59e0b] pb-px hover:text-[#d97706] transition-colors">Sign in →</Link>
+                  </div>
                 </form>
               </>
             )}
           </div>
         </div>
-
       </div>
-
       <Toast toasts={toasts} onDismiss={dismissToast} />
     </>
   );

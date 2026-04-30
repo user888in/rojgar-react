@@ -187,7 +187,7 @@ const AdminSecurityQ = () => {
     try {
       const res = await authFetch(`${API_BASE_URL}/admin/security-questions`, {
         method: 'POST',
-        body: JSON.stringify({ question: text, questionText: text }),
+        body: JSON.stringify({ question: text}),
       });
       if (!res.ok) {
         const errBody = await res.json().catch(() => ({}));

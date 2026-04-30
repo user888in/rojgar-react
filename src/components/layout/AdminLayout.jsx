@@ -483,8 +483,8 @@ const AdminLayout = () => {
                 onClick={() => { setProfileTab('edit'); setProfileAlert({ type: '', msg: '' }); }}
                 type="button"
                 className={`flex items-center gap-[7px] px-[18px] py-[14px] text-[13.5px] font-medium cursor-pointer bg-transparent border-b-2 transition-all ${profileTab === 'edit'
-                    ? 'text-[#0d9488] border-[#0d9488] font-semibold'
-                    : 'text-[#64748b] border-transparent hover:text-[#0f172a]'
+                  ? 'text-[#0d9488] border-[#0d9488] font-semibold'
+                  : 'text-[#64748b] border-transparent hover:text-[#0f172a]'
                   }`}
               >
                 <Pencil size={14} /> Edit Profile
@@ -493,8 +493,8 @@ const AdminLayout = () => {
                 onClick={() => { setProfileTab('password'); setPwAlert({ type: '', msg: '' }); }}
                 type="button"
                 className={`flex items-center gap-[7px] px-[18px] py-[14px] text-[13.5px] font-medium cursor-pointer bg-transparent border-b-2 transition-all ${profileTab === 'password'
-                    ? 'text-[#0d9488] border-[#0d9488] font-semibold'
-                    : 'text-[#64748b] border-transparent hover:text-[#0f172a]'
+                  ? 'text-[#0d9488] border-[#0d9488] font-semibold'
+                  : 'text-[#64748b] border-transparent hover:text-[#0f172a]'
                   }`}
               >
                 <Shield size={14} /> Change Password
@@ -506,8 +506,8 @@ const AdminLayout = () => {
               <div className="p-6 bg-white">
                 {profileAlert.msg && (
                   <div className={`flex items-start gap-[10px] px-[14px] py-3 rounded-[10px] text-[13px] mb-[14px] ${profileAlert.type === 'success'
-                      ? 'bg-[#f0fdf4] border border-[#bbf7d0] text-[#16a34a]'
-                      : 'bg-[#fef2f2] border border-[#fecaca] text-[#dc2626]'
+                    ? 'bg-[#f0fdf4] border border-[#bbf7d0] text-[#16a34a]'
+                    : 'bg-[#fef2f2] border border-[#fecaca] text-[#dc2626]'
                     }`}>
                     {profileAlert.type === 'success' ? <CheckCircle size={16} className="flex-shrink-0 mt-[1px]" /> : <AlertCircle size={16} className="flex-shrink-0 mt-[1px]" />}
                     <span>{profileAlert.msg}</span>
@@ -584,8 +584,8 @@ const AdminLayout = () => {
               <div className="p-6 bg-white">
                 {pwAlert.msg && (
                   <div className={`flex items-start gap-[10px] px-[14px] py-3 rounded-[10px] text-[13px] mb-[14px] ${pwAlert.type === 'success'
-                      ? 'bg-[#f0fdf4] border border-[#bbf7d0] text-[#16a34a]'
-                      : 'bg-[#fef2f2] border border-[#fecaca] text-[#dc2626]'
+                    ? 'bg-[#f0fdf4] border border-[#bbf7d0] text-[#16a34a]'
+                    : 'bg-[#fef2f2] border border-[#fecaca] text-[#dc2626]'
                     }`}>
                     {pwAlert.type === 'success' ? <CheckCircle size={16} className="flex-shrink-0 mt-[1px]" /> : <AlertCircle size={16} className="flex-shrink-0 mt-[1px]" />}
                     <span>{pwAlert.msg}</span>

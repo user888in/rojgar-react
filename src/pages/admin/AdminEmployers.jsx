@@ -15,19 +15,20 @@ import {
   Check,
   Loader2,
   ChevronDown,
+  UserCog,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { API_BASE_URL } from '../../config/api';
 
 /* ─── Design tokens (match admin-panel.css) ─── */
 const T = {
-  navy:   '#0b2239',
-  teal:   '#0d9488',
-  teal2:  '#14b8a6',
+  navy: '#0b2239',
+  teal: '#0d9488',
+  teal2: '#14b8a6',
   border: '#e8ecf1',
-  bg:     '#f2f5f9',
-  text:   '#0f172a',
-  sub:    '#64748b',
+  bg: '#f2f5f9',
+  text: '#0f172a',
+  sub: '#64748b',
 };
 
 /* ─── Helpers ─── */
@@ -39,8 +40,8 @@ const fmtDate = (d) =>
 /* ─── Status pill component ─── */
 const StatusPill = ({ status }) => {
   const map = {
-    ACTIVE:    { bg: '#f0fdf4', color: '#16a34a', border: '#bbf7d0', label: 'Active' },
-    PENDING:   { bg: '#fffbeb', color: '#d97706', border: '#fde68a', label: 'Pending' },
+    ACTIVE: { bg: '#f0fdf4', color: '#16a34a', border: '#bbf7d0', label: 'Active' },
+    PENDING: { bg: '#fffbeb', color: '#d97706', border: '#fde68a', label: 'Pending' },
     SUSPENDED: { bg: '#fef2f2', color: '#dc2626', border: '#fecaca', label: 'Suspended' },
   };
   const s = map[status] || map.PENDING;
@@ -73,7 +74,7 @@ const useToast = () => {
   const ToastContainer = () => {
     const colorMap = {
       success: { bg: '#f0fdf4', border: '#bbf7d0', color: '#15803d', icon: <CheckCircle size={15} /> },
-      danger:  { bg: '#fef2f2', border: '#fecaca', color: '#dc2626', icon: <AlertTriangle size={15} /> },
+      danger: { bg: '#fef2f2', border: '#fecaca', color: '#dc2626', icon: <AlertTriangle size={15} /> },
       warning: { bg: '#fffbeb', border: '#fde68a', color: '#d97706', icon: <AlertTriangle size={15} /> },
     };
     return (
@@ -109,21 +110,21 @@ const useToast = () => {
    MAIN COMPONENT
    ════════════════════════════════════════ */
 const AdminEmployers = () => {
-  const { getAuthHeaders, user, authFetch } = useAuth();
+  const { getAuthHeaders, user, token, authFetch, login } = useAuth();
   const { onOpenProfile } = useOutletContext() || {};
   const { push: toast, ToastContainer } = useToast();
 
   /* ── Server-side pagination state ── */
-  const [currentPage,   setCurrentPage]   = useState(0);
-  const [perPage,       setPerPage]       = useState(10);
-  const [totalPages,    setTotalPages]    = useState(0);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [perPage, setPerPage] = useState(10);
+  const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
-  const [search,        setSearch]        = useState('');
-  const [statusFilter,  setStatusFilter]  = useState('');
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
   const searchTimer = useRef(null);
 
   /* ── Data ── */
-  const [data,    setData]    = useState([]);
+  const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
 
   /* ── Stat cards ── */
@@ -131,13 +132,13 @@ const AdminEmployers = () => {
 
   /* ── Selection ── */
   const [selectedIds, setSelectedIds] = useState(new Set());
-  const [busyIds,     setBusyIds]     = useState(new Set());
+  const [busyIds, setBusyIds] = useState(new Set());
 
   /* ── Suspend modal ── */
   const [suspendModal, setSuspendModal] = useState({ open: false, id: null, name: '' });
-  const [suspendReason,      setSuspendReason]      = useState('');
+  const [suspendReason, setSuspendReason] = useState('');
   const [suspendReasonError, setSuspendReasonError] = useState(false);
-  const [suspendingId,       setSuspendingId]       = useState(null);
+  const [suspendingId, setSuspendingId] = useState(null);
 
   /* ── Bulk activate ── */
   const [bulkLoading, setBulkLoading] = useState(false);
@@ -148,8 +149,8 @@ const AdminEmployers = () => {
     p.set('page', currentPage);
     p.set('size', perPage);
     p.set('direction', 'desc');
-    if (search.trim())  p.set('search', search.trim());
-    if (statusFilter)   p.set('status', statusFilter);
+    if (search.trim()) p.set('search', search.trim());
+    if (statusFilter) p.set('status', statusFilter);
     return p.toString();
   }, [currentPage, perPage, search, statusFilter]);
 
@@ -166,8 +167,8 @@ const AdminEmployers = () => {
         allRes.json(), activeRes.json(), pendingRes.json(), suspRes.json(),
       ]);
       setStats({
-        total:   all.totalElements   ?? '0',
-        active:  active.totalElements ?? '0',
+        total: all.totalElements ?? '0',
+        active: active.totalElements ?? '0',
         blocked: (pending.totalElements ?? 0) + (susp.totalElements ?? 0),
       });
     } catch { /* silent */ }
@@ -234,7 +235,7 @@ const AdminEmployers = () => {
   const selectAllState = (() => {
     if (!inactiveIds.length) return 'none';
     const sel = inactiveIds.filter((id) => selectedIds.has(id)).length;
-    if (sel === 0)               return 'none';
+    if (sel === 0) return 'none';
     if (sel === inactiveIds.length) return 'all';
     return 'indeterminate';
   })();
@@ -256,6 +257,60 @@ const AdminEmployers = () => {
       toast('Failed to activate.', 'danger');
     } finally {
       setBusyIds((p) => { const n = new Set(p); n.delete(id); return n; });
+    }
+  };
+
+  /* ── Impersonate Recruiter ── */
+  const impersonateRecruiter = async (targetUserId) => {
+    if (!window.confirm('You will be logged in as this recruiter. Continue?')) return;
+    setBusyIds((p) => new Set([...p, targetUserId]));
+    try {
+      const res = await authFetch(`${API_BASE_URL}/auth/impersonate/${targetUserId}`, {
+        method: 'POST',
+      });
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Impersonation failed.');
+      }
+      const data = await res.json();
+      sessionStorage.setItem(
+        'impersonation',
+        JSON.stringify({
+          active: true,
+          targetUserId: data.userId,
+          targetUsername: data.username,
+          targetFullName: data.fullName || data.username,
+          targetEmail: data.email,
+          targetRole: data.role,
+          adminUsername: data.impersonatedBy,
+          adminUser: user,
+        })
+      );
+
+      // Update AuthContext to the impersonated user so ProtectedRoute allows access
+      const impersonatedUser = {
+        userId: data.userId || targetUserId,
+        id: data.userId || targetUserId,
+        username: data.username,
+        fullName: data.fullName || data.username,
+        email: data.email,
+        role: data.role || 'RECRUITER'
+      };
+
+      login(data.token || token, impersonatedUser);
+
+      toast(`Entering session as ${data.username}…`, 'warning');
+      setTimeout(() => {
+        window.location.href = '/recruiter/dashboard';
+      }, 900);
+    } catch (err) {
+      toast(err.message || 'Network error during impersonation.', 'danger');
+    } finally {
+      setBusyIds((p) => {
+        const n = new Set(p);
+        n.delete(targetUserId);
+        return n;
+      });
     }
   };
 
@@ -670,11 +725,11 @@ const AdminEmployers = () => {
                   </tr>
                 ) : (
                   data.map((r, i) => {
-                    const isActive    = r.recruiterStatus === 'ACTIVE';
+                    const isActive = r.recruiterStatus === 'ACTIVE';
                     const isSuspended = r.recruiterStatus === 'SUSPENDED';
-                    const isChecked   = selectedIds.has(r.recruiterId);
-                    const isBusy      = busyIds.has(r.recruiterId);
-                    const initials    = (r.fullName || '?')[0].toUpperCase();
+                    const isChecked = selectedIds.has(r.recruiterId);
+                    const isBusy = busyIds.has(r.recruiterId);
+                    const initials = (r.fullName || '?')[0].toUpperCase();
 
                     return (
                       <tr
@@ -752,6 +807,15 @@ const AdminEmployers = () => {
                               onClick={() => openSuspend(r.recruiterId)}
                             >
                               <Ban size={12} /> Suspend
+                            </button>
+                            <button
+                              className="emp-action-btn"
+                              style={{ background: '#f5f3ff', color: '#7c3aed', borderColor: '#c4b5fd' }}
+                              disabled={isBusy}
+                              onClick={() => impersonateRecruiter(r.recruiterId)}
+                            >
+                              {isBusy ? <Loader2 size={12} style={{ animation: 'spin 1s linear infinite' }} /> : <UserCog size={12} />}
+                              View As
                             </button>
                           </div>
                         </td>

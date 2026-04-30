@@ -179,10 +179,10 @@ const AdminDashboard = () => {
   const formatDate = (d) =>
     d
       ? new Date(d).toLocaleDateString("en-IN", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-        })
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      })
       : "N/A";
 
   const todayDate = new Date().toLocaleDateString("en-IN", {

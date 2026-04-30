@@ -293,8 +293,9 @@ const Home = () => {
       });
       if (response.ok) {
         const data = await response.json();
-        setCompanies(data);
-        setTotalSteps(Math.ceil(data.length / CARDS_PER_STEP));
+        const list = Array.isArray(data) ? data : (data.content || []);
+        setCompanies(list);
+        setTotalSteps(Math.ceil(list.length / CARDS_PER_STEP));
       } else {
         console.error(`Companies API error: HTTP ${response.status}`);
       }
@@ -1012,7 +1013,7 @@ const Home = () => {
                     transform: `translateX(-${currentStep * CARDS_PER_STEP * CARD_W}px)`,
                   }}
                 >
-                  {companies.map((company) => {
+                  {Array.isArray(companies) && companies.map((company) => {
                     const initials = company.companyName
                       .split(" ")
                       .map((w) => w[0])
@@ -1021,10 +1022,10 @@ const Home = () => {
                       .toUpperCase();
                     return (
                       <div
-                        key={company.id}
+                        key={company.companyId || company.id}
                         className="flex-none w-[175px] bg-white rounded-[16px] p-5 text-center shadow-sm cursor-pointer transition-all hover:-translate-y-1 hover:shadow-md hover:border-[#18a99c] border-[1.5px] border-transparent"
                         onClick={() =>
-                          navigate(`/companies/${company.id}`)
+                          navigate(`/companies/${company.companyId || company.id}`)
                         }
                       >
                         <div className="w-full h-20 rounded-xl flex items-center justify-center overflow-hidden">
